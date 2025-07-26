@@ -1,0 +1,386 @@
+---
+title: "Capstone R Work"
+author: "Barrett Viator"
+date: "2025-07-26"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(reticulate)
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+
+```
+
+
+```{r}
+# The name for our virtual environment - BJV
+env_name <- "retic_env2"
+
+# create our virtual env - BJV
+message("Creating virtual environment '", env_name, "' and installing packages...")
+
+reticulate::virtualenv_create(
+  envname = env_name,
+  packages = c("pandas", "requests", "openpyxl", "pycountry", "wbgapi")
+)
+
+# Direct R to the correct virtual environment
+reticulate::use_virtualenv(env_name, required = TRUE)
+
+message("\nPython environment is now set up and ready.")
+py_config()
+
+```
+
+```{r}
+# Turn the python code into a string for Reticulate and import the python libraries needed - BJV
+wb_undp_api_python_code <- "
+import pandas as pd
+import wbgapi as wb
+import requests
+import openpyxl
+import pycountry
+
+wb_series_codes = [
+    'NY.GDP.PCAP.KD.ZG',
+    'NY.GNP.PCAP.KD.ZG',
+    'SE.XPD.TOTL.GD.ZS',
+    'SE.ADT.LITR.ZS',
+    'SE.COM.DURS',
+    'SE.LPV.PRIM',
+    'SE.LPV.PRIM.SD',
+    'SE.SEC.CUAT.LO.ZS',
+    'SE.SEC.CUAT.PO.ZS',
+    'SE.SEC.CUAT.UP.ZS',
+    'SE.TER.CUAT.BA.ZS',
+    'SE.TER.CUAT.DO.ZS',
+    'SE.TER.CUAT.MS.ZS',
+    'SE.TER.CUAT.ST.ZS',
+    'AG.PRD.FOOD.XD',
+    'EN.POP.DNST',
+    'EN.POP.SLUM.UR.ZS',
+    'SP.RUR.TOTL.ZG',
+    'EG.ELC.ACCS.ZS',
+    'ER.H2O.FWST.ZS',
+    'FX.OWN.TOTL.ZS',
+    'SN.ITK.MSFI.ZS',
+    'SH.XPD.CHEX.PC.CD',
+    'SH.XPD.GHED.PC.CD',
+    'SH.STA.WASH.P5',
+    'SP.DYN.LE00.IN',
+    'SH.UHC.SRVS.CV.XD',
+    'IT.NET.BBND.P2',
+    'IT.NET.USER.ZS',
+    'GB.XPD.RSDV.GD.ZS',
+    'IS.SHP.GCNW.XQ',
+    'SI.POV.GINI',
+    'VC.IHR.PSRC.P5',
+    'CC.EST',
+    'GE.EST',
+    'PV.EST',
+    'RL.EST',
+    'VA.EST',
+    'SM.POP.TOTL.ZS',
+    'SI.POV.GINI'
+]
+
+# Create a data frame from the World Bank API - BJV
+
+wb_df = wb.data.DataFrame(
+    wb_series_codes,
+    economy='all',
+    time=range(1995, 2024),
+    columns='series'
+)
+
+# Index needs to be reset in ordert for 'economy' and 'time' to be accessed and renamed - BJV
+wb_df = wb_df.reset_index()
+
+wb_df = wb_df.rename(columns={'economy': 'ISO3', 'time': 'year'})
+
+# Remove YR from the 'year' column to leave just four digit years - BJV
+
+wb_df['year'] = wb_df['year'].astype(str).str.replace('YR', '', regex=False)
+    
+# convert the year to a numeric from string for errors arising later - BJV
+wb_df['year'] = pd.to_numeric(wb_df['year'], errors='coerce').astype('Int64')
+
+
+# UNDP API Key and Request - BJV
+
+undp_url = 'https://hdrdata.org/api/CompositeIndices/query?apikey=HDR-KOgLmhxaLjacLvGRi4oTPARBLx54ubNe&year=2022,2023'
+
+response = requests.get(undp_url)
+
+if response.status_code == 200:
+    data = response.json()
+
+df1 = pd.DataFrame(data)
+
+# UNDP API Key and Request - BJV
+
+undp_url2 = 'https://hdrdata.org/api/CompositeIndices/query?apikey=HDR-KOgLmhxaLjacLvGRi4oTPARBLx54ubNe&year=2020,2021'
+
+response2 = requests.get(undp_url2)
+
+if response2.status_code == 200:
+    data2 = response2.json()
+
+df2 = pd.DataFrame(data2)
+
+# UNDP API Key and Request - BJV
+
+undp_url3 = 'https://hdrdata.org/api/CompositeIndices/query?apikey=HDR-KOgLmhxaLjacLvGRi4oTPARBLx54ubNe&year=2018,2019'
+
+response3 = requests.get(undp_url3)
+
+if response3.status_code == 200:
+    data3 = response3.json()
+
+df3 = pd.DataFrame(data3)
+
+# UNDP API Key and Request - BJV
+
+undp_url4 = 'https://hdrdata.org/api/CompositeIndices/query?apikey=HDR-KOgLmhxaLjacLvGRi4oTPARBLx54ubNe&year=2016,2017'
+
+response4 = requests.get(undp_url4)
+
+if response4.status_code == 200:
+    data4 = response4.json()
+
+df4 = pd.DataFrame(data4)
+
+# UNDP API Key and Request - BJV
+
+undp_url5 = 'https://hdrdata.org/api/CompositeIndices/query?apikey=HDR-KOgLmhxaLjacLvGRi4oTPARBLx54ubNe&year=2014,2015'
+
+response5 = requests.get(undp_url5)
+
+if response5.status_code == 200:
+    data5 = response5.json()
+
+df5 = pd.DataFrame(data5)
+
+# UNDP API Key and Request - BJV
+
+undp_url6 = 'https://hdrdata.org/api/CompositeIndices/query?apikey=HDR-KOgLmhxaLjacLvGRi4oTPARBLx54ubNe&year=2012,2013'
+
+response6 = requests.get(undp_url6)
+
+if response6.status_code == 200:
+    data6 = response6.json()
+
+df6 = pd.DataFrame(data6)
+
+# UNDP API Key and Request - BJV
+
+undp_url7 = 'https://hdrdata.org/api/CompositeIndices/query?apikey=HDR-KOgLmhxaLjacLvGRi4oTPARBLx54ubNe&year=2010,2011'
+
+response7 = requests.get(undp_url7)
+
+if response7.status_code == 200:
+    data7 = response7.json()
+
+df7 = pd.DataFrame(data7)
+
+# UNDP API Key and Request - BJV
+
+undp_url8 = 'https://hdrdata.org/api/CompositeIndices/query?apikey=HDR-KOgLmhxaLjacLvGRi4oTPARBLx54ubNe&year=2008,2009'
+
+response8 = requests.get(undp_url8)
+
+if response8.status_code == 200:
+    data8 = response8.json()
+
+df8 = pd.DataFrame(data8)
+
+# UNDP API Key and Request - BJV
+
+undp_url9 = 'https://hdrdata.org/api/CompositeIndices/query?apikey=HDR-KOgLmhxaLjacLvGRi4oTPARBLx54ubNe&year=2006,2007'
+
+response9 = requests.get(undp_url9)
+
+if response9.status_code == 200:
+    data9 = response9.json()
+
+df9 = pd.DataFrame(data9)
+
+# UNDP API Key and Request - BJV
+
+undp_url10 = 'https://hdrdata.org/api/CompositeIndices/query?apikey=HDR-KOgLmhxaLjacLvGRi4oTPARBLx54ubNe&year=2004,2005'
+
+response10 = requests.get(undp_url10)
+
+if response10.status_code == 200:
+    data10 = response10.json()
+
+df10 = pd.DataFrame(data10)
+
+# UNDP API Key and Request - BJV
+
+undp_url11 = 'https://hdrdata.org/api/CompositeIndices/query?apikey=HDR-KOgLmhxaLjacLvGRi4oTPARBLx54ubNe&year=2002,2003'
+
+response11 = requests.get(undp_url11)
+
+if response11.status_code == 200:
+    data11 = response11.json()
+
+df11 = pd.DataFrame(data11)
+
+# UNDP API Key and Request - BJV
+
+undp_url12 = 'https://hdrdata.org/api/CompositeIndices/query?apikey=HDR-KOgLmhxaLjacLvGRi4oTPARBLx54ubNe&year=2000,2001'
+
+response12 = requests.get(undp_url12)
+
+if response12.status_code == 200:
+    data12 = response12.json()
+
+df12 = pd.DataFrame(data12)
+
+# UNDP API Key and Request - BJV
+
+undp_url13 = 'https://hdrdata.org/api/CompositeIndices/query?apikey=HDR-KOgLmhxaLjacLvGRi4oTPARBLx54ubNe&year=1998,1999'
+
+response13 = requests.get(undp_url13)
+
+if response13.status_code == 200:
+    data13 = response13.json()
+
+df13 = pd.DataFrame(data13)
+
+# UNDP API Key and Request - BJV
+
+undp_url14 = 'https://hdrdata.org/api/CompositeIndices/query?apikey=HDR-KOgLmhxaLjacLvGRi4oTPARBLx54ubNe&year=1996,1997'
+
+response14 = requests.get(undp_url14)
+
+if response14.status_code == 200:
+    data14 = response14.json()
+
+df14 = pd.DataFrame(data14)
+
+# UNDP API Key and Request - BJV
+
+undp_url15 = 'https://hdrdata.org/api/CompositeIndices/query?apikey=HDR-KOgLmhxaLjacLvGRi4oTPARBLx54ubNe&year=1995'
+
+response15 = requests.get(undp_url15)
+
+if response15.status_code == 200:
+    data15 = response15.json()
+
+df15 = pd.DataFrame(data15)
+
+all_dataframes = [df1, df2, df3, df4, df5, df6, df7, df8,
+                 df9, df10, df11, df12, df13, df14, df15]
+
+# Create a list of all data frames to be concatenated. -BJV
+list_of_dfs = [df1, df2, df3, df4, df5, df6, df7, df8,
+               df9, df10, df11, df12, df13, df14, df15]
+
+# Concatenate all the data frames in the list. - BJV
+
+combined_df = pd.concat(list_of_dfs, ignore_index=True)
+
+
+# Create a df from a dictionary for saving file - BJV
+undp_full_df = pd.DataFrame(combined_df)
+
+# Country needed to split the ISO3 and the Country names - BJV
+split_data = undp_full_df['country'].str.split(' - ', n=1, expand=True)
+
+undp_full_df['ISO3 Code'] = split_data[0]
+undp_full_df['Country Name'] = split_data[1]
+
+# Drop the original 'Country' column - BJV
+undp_full_df_split = undp_full_df.drop(columns=['country'])
+
+# 'Value' was causing and error and needed to be converted to numeric - BJV
+undp_full_df_split['value'] = pd.to_numeric(undp_full_df_split['value'], errors='coerce')    
+
+# Data needed to be pivoted for clarity when doing EDA - BJV
+
+undp_full_df_pivoted = undp_full_df_split.pivot_table(index=['ISO3 Code', 'year'], 
+                            columns='indicator', 
+                            values='value')
+
+undp_full_df_pivoted = undp_full_df_pivoted.rename(columns={'ISO3 Code': 'ISO3'})
+
+
+# These are the columns that are relevant to our study from the total column options - BJV
+
+columns_to_keep = [
+    'hdi - Human Development Index (value)',
+    'gii_rank - GII Rank',
+    'rankdiff_hdi_phdi - Difference from HDI rank',
+    'ihdi - Inequality-adjusted Human Development Index (value)',
+    'coef_ineq - Coefficient of human inequality',
+    'ineq_le - Inequality in life expectancy',
+    'le - Life Expectancy at Birth (years)',
+    'ineq_edu - Inequality in eduation',
+    'ineq_inc - Inequality in income',
+    'coef_ineq - Coefficient of human inequality'
+]
+
+undp_full_df_pivoted.index.rename(
+    ['ISO3', 'year'], 
+    inplace=True
+)
+
+undp_df_filtered = undp_full_df_pivoted[columns_to_keep]
+
+undp_df_filtered = undp_df_filtered.reset_index()
+
+undp_df_filtered['year'] = pd.to_numeric(undp_df_filtered['year'], errors='coerce').astype('Int64')
+
+# Joined Work Bank and UNDP Data Frames - BJV
+
+undp_wb_filtered_full = pd.merge(undp_df_filtered, wb_df, on=['ISO3', 'year'], how='left')
+
+# Use pycountry to map country names to IS03 codes -BJV
+iso3_to_name_map = {}
+for country in pycountry.countries:
+    iso3_to_name_map[country.alpha_3] = country.name
+
+mapped_full_df = pd.DataFrame(undp_wb_filtered_full)
+
+# Add the 'Country Name' column - BJV
+mapped_full_df['Country Name'] = mapped_full_df['ISO3'].map(iso3_to_name_map)
+
+cols = mapped_full_df.columns.tolist()
+
+current_index_of_country_name = cols.index('Country Name')
+
+# Pop country name - BJV
+
+column_to_move = cols.pop(current_index_of_country_name)
+
+# Move 'country name' to column 2 
+cols.insert(1, column_to_move)
+
+mapped_full_df = mapped_full_df[cols]"
+
+
+reticulate::py_run_string(wb_undp_api_python_code)
+
+wb_undp_df_r <- py$mapped_full_df
+
+```
+
+
+```{r}
+
+# Example of the python code turning into a dataframe that works with tidyverse, etc. - BJV
+glimpse(wb_undp_df_r)
+
+
+head(wb_undp_df_r)
+
+```
