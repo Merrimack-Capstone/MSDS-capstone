@@ -1,0 +1,435 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[landscape,margin=0.75in,margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{5}
+\usepackage{xcolor}
+\usepackage{lscape}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Exploratory Data Analysys},
+  pdfauthor={Barrett Viator and Ray Chandonnet},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Exploratory Data Analysys}
+\author{Barrett Viator and Ray Chandonnet}
+\date{2025-07-26}
+
+\begin{document}
+\maketitle
+
+\textcolor{blue}{This code uses static data as its starting point rather than running a lengthy API call.  For production, to access realtime current data, this would be replaced by a call to the API using the reticulate functions that call Python code in R}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{RawData }\OtherTok{\textless{}{-}} \FunctionTok{readRDS}\NormalTok{(here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(}\StringTok{"Data"}\NormalTok{,}\StringTok{"PreEDA\_DataFrame.rds"}\NormalTok{))}
+\FunctionTok{names}\NormalTok{(RawData) }\OtherTok{\textless{}{-}} \FunctionTok{make.unique}\NormalTok{(}\FunctionTok{names}\NormalTok{(RawData), }\AttributeTok{sep =} \StringTok{"."}\NormalTok{)}
+\NormalTok{FieldActions }\OtherTok{\textless{}{-}} \FunctionTok{read\_excel}\NormalTok{(here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(}\StringTok{"Data"}\NormalTok{, }\StringTok{"FieldActions.xlsx"}\NormalTok{))}
+\NormalTok{CleanedData }\OtherTok{\textless{}{-}}\NormalTok{ RawData }\CommentTok{\# make a copy to preserve original}
+\NormalTok{IncomeData }\OtherTok{\textless{}{-}} \FunctionTok{read\_excel}\NormalTok{(here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(}\StringTok{"Data"}\NormalTok{, }\StringTok{"Income Group Data.xlsx"}\NormalTok{)) }\CommentTok{\# Import income data}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# This code iterates through every field in the raw data, taking the cleanup action on}
+\CommentTok{\# it that is specified in the FieldActions data frame.  The net result is that a bunch of}
+\CommentTok{\# duplicated and/or unneeded fields are deleted, fields with uninterpretable (coded) column }
+\CommentTok{\# names tied to their source are renamed to be descriptive, and the Year column is forced }
+\CommentTok{\# to an integer}
+
+\ControlFlowTok{for}\NormalTok{ (fieldcounter }\ControlFlowTok{in} \FunctionTok{names}\NormalTok{(CleanedData)) \{}
+\NormalTok{  action\_row }\OtherTok{\textless{}{-}}\NormalTok{ FieldActions[FieldActions}\SpecialCharTok{$}\NormalTok{FieldName }\SpecialCharTok{==}\NormalTok{ fieldcounter, ]}
+  \ControlFlowTok{if}\NormalTok{ (}\FunctionTok{nrow}\NormalTok{(action\_row) }\SpecialCharTok{==} \DecValTok{0}\NormalTok{) \{}
+    \ControlFlowTok{next}  \CommentTok{\# No action specified for this field}
+\NormalTok{  \}}
+\NormalTok{  WhatToDo }\OtherTok{\textless{}{-}}\NormalTok{ action\_row}\SpecialCharTok{$}\NormalTok{Action}
+  \ControlFlowTok{if}\NormalTok{ (WhatToDo }\SpecialCharTok{==} \StringTok{"Delete"}\NormalTok{) \{}
+\NormalTok{    CleanedData[[fieldcounter]] }\OtherTok{\textless{}{-}} \ConstantTok{NULL}
+    
+\NormalTok{  \} }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (WhatToDo }\SpecialCharTok{==} \StringTok{"Rename"}\NormalTok{) \{}
+    \FunctionTok{names}\NormalTok{(CleanedData)[}\FunctionTok{names}\NormalTok{(CleanedData) }\SpecialCharTok{==}\NormalTok{ fieldcounter] }\OtherTok{\textless{}{-}}\NormalTok{ action\_row}\SpecialCharTok{$}\NormalTok{RenamedTo}
+    
+\NormalTok{  \} }\ControlFlowTok{else} \ControlFlowTok{if}\NormalTok{ (WhatToDo }\SpecialCharTok{==} \StringTok{"Make Integer"}\NormalTok{) \{}
+\NormalTok{    CleanedData[[fieldcounter]] }\OtherTok{\textless{}{-}} \FunctionTok{as.integer}\NormalTok{(CleanedData[[fieldcounter]])}
+\NormalTok{  \}}
+\NormalTok{\}}
+\CommentTok{\# Now, pull in the Income Group Data, and join it to the raw data by CountryCode}
+\NormalTok{CleanedData }\OtherTok{\textless{}{-}} \FunctionTok{left\_join}\NormalTok{(CleanedData, IncomeData, }\AttributeTok{by =} \FunctionTok{c}\NormalTok{(}\StringTok{"CountryCode"} \OtherTok{=} \StringTok{"Country Code"}\NormalTok{))}
+
+\CommentTok{\# Now for initial EDA purposes, I am only going to consider the two wellbeing indexes}
+\CommentTok{\# which are tagged as my PrimaryResponse fields.  So I want to drop the other more granular}
+\CommentTok{\# Response fields}
+
+\CommentTok{\# Select field names to keep}
+\CommentTok{\# First, all the renamed fields that weren\textquotesingle{}t dropped and aren\textquotesingle{}t a Response}
+\NormalTok{PrimaryFields }\OtherTok{\textless{}{-}}\NormalTok{ FieldActions }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(Type }\SpecialCharTok{\%in\%} \FunctionTok{c}\NormalTok{(}\StringTok{"PrimaryResponse"}\NormalTok{,}\StringTok{"Predictor"}\NormalTok{,}\StringTok{"Identifier"}\NormalTok{),}
+         \FunctionTok{is.na}\NormalTok{(Action) }\SpecialCharTok{|}\NormalTok{ Action }\SpecialCharTok{!=} \StringTok{"Delete"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pull}\NormalTok{(RenamedTo)}
+\CommentTok{\# Now add the Income Group field (since that was joined from a different data set)}
+\NormalTok{PrimaryFields }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(PrimaryFields, }\StringTok{"Income Group"}\NormalTok{)}
+\CommentTok{\# Subset the cleaned dataset using that list of fields}
+\NormalTok{FirstCutData }\OtherTok{\textless{}{-}}\NormalTok{ CleanedData }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(}\FunctionTok{all\_of}\NormalTok{(PrimaryFields))}
+\FunctionTok{write\_xlsx}\NormalTok{(FirstCutData, }\AttributeTok{path =}\NormalTok{ here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(}\StringTok{"Data"}\NormalTok{,}\StringTok{"FirstCutData.xlsx"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}[H]
+\centering
+\caption{\label{tab:SummaryData_1}Summary Statistics (Variables 1 to 8)}
+\centering
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
+\begin{tabular}[t]{lllllllll}
+\toprule
+  & CountryCode & CountryName &      year &   HDI\_Index &   IHDI\_Index &   GiniCoeff &   FoodIndex & CorruptionScore\\
+\midrule
+\cellcolor{gray!10}{} & \cellcolor{gray!10}{Length:5974} & \cellcolor{gray!10}{Length:5974} & \cellcolor{gray!10}{Min.   :1995} & \cellcolor{gray!10}{Min.   :0.2380} & \cellcolor{gray!10}{Min.   :0.1340} & \cellcolor{gray!10}{Min.   : 4.819} & \cellcolor{gray!10}{Min.   : 17.00} & \cellcolor{gray!10}{Min.   :-1.96956}\\
+ & Class :character & Class :character & 1st Qu.:2002 & 1st Qu.:0.5700 & 1st Qu.:0.3990 & 1st Qu.:11.060 & 1st Qu.: 76.58 & 1st Qu.:-0.82041\\
+\cellcolor{gray!10}{} & \cellcolor{gray!10}{Mode  :character} & \cellcolor{gray!10}{Mode  :character} & \cellcolor{gray!10}{Median :2009} & \cellcolor{gray!10}{Median :0.7110} & \cellcolor{gray!10}{Median :0.5930} & \cellcolor{gray!10}{Median :19.183} & \cellcolor{gray!10}{Median : 94.52} & \cellcolor{gray!10}{Median :-0.29892}\\
+ & NA & NA & Mean   :2009 & Mean   :0.6899 & Mean   :0.5783 & Mean   :21.317 & Mean   : 91.33 & Mean   :-0.05974\\
+\cellcolor{gray!10}{} & \cellcolor{gray!10}{NA} & \cellcolor{gray!10}{NA} & \cellcolor{gray!10}{3rd Qu.:2016} & \cellcolor{gray!10}{3rd Qu.:0.8140} & \cellcolor{gray!10}{3rd Qu.:0.7500} & \cellcolor{gray!10}{3rd Qu.:31.878} & \cellcolor{gray!10}{3rd Qu.:102.80} & \cellcolor{gray!10}{3rd Qu.: 0.59246}\\
+\addlinespace
+ & NA & NA & Max.   :2023 & Max.   :0.9720 & Max.   :0.9230 & Max.   :51.891 & Max.   :578.71 & Max.   : 2.45912\\
+\cellcolor{gray!10}{} & \cellcolor{gray!10}{NA} & \cellcolor{gray!10}{NA} & \cellcolor{gray!10}{NA} & \cellcolor{gray!10}{NA's   :422} & \cellcolor{gray!10}{NA's   :3677} & \cellcolor{gray!10}{NA's   :3670} & \cellcolor{gray!10}{NA's   :720} & \cellcolor{gray!10}{NA's   :1204}\\
+\bottomrule
+\end{tabular}}
+\end{table}\begin{table}[H]
+\centering
+\caption{\label{tab:SummaryData_9}Summary Statistics (Variables 9 to 16)}
+\centering
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
+\begin{tabular}[t]{lllllllll}
+\toprule
+  & ElectricAccess &   PopDensity &   PopInSlums &  WaterStress & BankingAccess &   RnDInvest & GovtEffectiveness & ShippingIndex\\
+\midrule
+\cellcolor{gray!10}{} & \cellcolor{gray!10}{Min.   :  0.80} & \cellcolor{gray!10}{Min.   :    1.438} & \cellcolor{gray!10}{Min.   : 0.00} & \cellcolor{gray!10}{Min.   :   0.0258} & \cellcolor{gray!10}{Min.   :  0.40} & \cellcolor{gray!10}{Min.   :0.0054} & \cellcolor{gray!10}{Min.   :-2.44023} & \cellcolor{gray!10}{Min.   :  0.6032}\\
+ & 1st Qu.: 63.20 & 1st Qu.:   30.875 & 1st Qu.: 1.55 & 1st Qu.:   3.7148 & 1st Qu.: 31.07 & 1st Qu.:0.2383 & 1st Qu.:-0.78651 & 1st Qu.:  7.5392\\
+\cellcolor{gray!10}{} & \cellcolor{gray!10}{Median : 98.10} & \cellcolor{gray!10}{Median :   77.922} & \cellcolor{gray!10}{Median :21.18} & \cellcolor{gray!10}{Median :  11.1751} & \cellcolor{gray!10}{Median : 54.05} & \cellcolor{gray!10}{Median :0.6029} & \cellcolor{gray!10}{Median :-0.20432} & \cellcolor{gray!10}{Median : 15.1677}\\
+ & Mean   : 79.23 & Mean   :  298.200 & Mean   :28.73 & Mean   :  65.0840 & Mean   : 57.04 & Mean   :0.9675 & Mean   :-0.06367 & Mean   : 25.1422\\
+\cellcolor{gray!10}{} & \cellcolor{gray!10}{3rd Qu.:100.00} & \cellcolor{gray!10}{3rd Qu.:  176.610} & \cellcolor{gray!10}{3rd Qu.:52.80} & \cellcolor{gray!10}{3rd Qu.:  39.6974} & \cellcolor{gray!10}{3rd Qu.: 86.76} & \cellcolor{gray!10}{3rd Qu.:1.3904} & \cellcolor{gray!10}{3rd Qu.: 0.59433} & \cellcolor{gray!10}{3rd Qu.: 34.1564}\\
+\addlinespace
+ & Max.   :100.00 & Max.   :18822.891 & Max.   :99.81 & Max.   :3850.5000 & Max.   :100.00 & Max.   :6.0192 & Max.   : 2.46966 & Max.   :171.1775\\
+\cellcolor{gray!10}{} & \cellcolor{gray!10}{NA's   :627} & \cellcolor{gray!10}{NA's   :583} & \cellcolor{gray!10}{NA's   :4011} & \cellcolor{gray!10}{NA's   :1505} & \cellcolor{gray!10}{NA's   :5412} & \cellcolor{gray!10}{NA's   :3666} & \cellcolor{gray!10}{NA's   :1223} & \cellcolor{gray!10}{NA's   :3592}\\
+\bottomrule
+\end{tabular}}
+\end{table}\begin{table}[H]
+\centering
+\caption{\label{tab:SummaryData_17}Summary Statistics (Variables 17 to 24)}
+\centering
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
+\begin{tabular}[t]{lllllllll}
+\toprule
+  &  FixedIntSubs & InternetUsersPct & PoliticalStability &   RuleOfLaw &  RqdEduYears & GovtEduSpendPctGDP & MortalityFromDirtyness & UHCServiceCoverage\\
+\midrule
+\cellcolor{gray!10}{} & \cellcolor{gray!10}{Min.   : 0.0000} & \cellcolor{gray!10}{Min.   :  0.00} & \cellcolor{gray!10}{Min.   :-3.31295} & \cellcolor{gray!10}{Min.   :-2.59088} & \cellcolor{gray!10}{Min.   : 4.00} & \cellcolor{gray!10}{Min.   : 0.000} & \cellcolor{gray!10}{Min.   :  0.40} & \cellcolor{gray!10}{Min.   :11.00}\\
+ & 1st Qu.: 0.2673 & 1st Qu.:  2.81 & 1st Qu.:-0.69566 & 1st Qu.:-0.82174 & 1st Qu.: 8.00 & 1st Qu.: 3.139 & 1st Qu.:  2.95 & 1st Qu.:44.00\\
+\cellcolor{gray!10}{} & \cellcolor{gray!10}{Median : 3.8683} & \cellcolor{gray!10}{Median : 21.00} & \cellcolor{gray!10}{Median : 0.02612} & \cellcolor{gray!10}{Median :-0.20532} & \cellcolor{gray!10}{Median : 9.00} & \cellcolor{gray!10}{Median : 4.232} & \cellcolor{gray!10}{Median :  6.10} & \cellcolor{gray!10}{Median :63.00}\\
+ & Mean   :10.5358 & Mean   : 32.58 & Mean   :-0.06279 & Mean   :-0.06373 & Mean   : 9.42 & Mean   : 4.418 & Mean   : 16.96 & Mean   :59.39\\
+\cellcolor{gray!10}{} & \cellcolor{gray!10}{3rd Qu.:18.4017} & \cellcolor{gray!10}{3rd Qu.: 61.40} & \cellcolor{gray!10}{3rd Qu.: 0.79477} & \cellcolor{gray!10}{3rd Qu.: 0.69307} & \cellcolor{gray!10}{3rd Qu.:11.00} & \cellcolor{gray!10}{3rd Qu.: 5.428} & \cellcolor{gray!10}{3rd Qu.: 25.55} & \cellcolor{gray!10}{3rd Qu.:75.00}\\
+\addlinespace
+ & Max.   :62.2147 & Max.   :100.00 & Max.   : 1.75868 & Max.   : 2.12476 & Max.   :17.00 & Max.   :15.863 & Max.   :108.10 & Max.   :91.00\\
+\cellcolor{gray!10}{} & \cellcolor{gray!10}{NA's   :2041} & \cellcolor{gray!10}{NA's   :675} & \cellcolor{gray!10}{NA's   :1160} & \cellcolor{gray!10}{NA's   :1114} & \cellcolor{gray!10}{NA's   :1432} & \cellcolor{gray!10}{NA's   :2288} & \cellcolor{gray!10}{NA's   :5791} & \cellcolor{gray!10}{NA's   :4630}\\
+\bottomrule
+\end{tabular}}
+\end{table}\begin{table}[H]
+\centering
+\caption{\label{tab:SummaryData_25}Summary Statistics (Variables 25 to 32)}
+\centering
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
+\begin{tabular}[t]{lllllllll}
+\toprule
+  & HealthSpendPerCapita & GovtHealthSpendPerCapita &  MigrantsPct & FoodInsecurityPct & RuralPopulGrowth & VoiceAccountability &   Homicides & Income Group\\
+\midrule
+\cellcolor{gray!10}{} & \cellcolor{gray!10}{Min.   :    4.176} & \cellcolor{gray!10}{Min.   :   0.1489} & \cellcolor{gray!10}{Min.   : 0.036} & \cellcolor{gray!10}{Min.   : 2.00} & \cellcolor{gray!10}{Min.   :-235.9259} & \cellcolor{gray!10}{Min.   :-2.31340} & \cellcolor{gray!10}{Min.   :  0.000} & \cellcolor{gray!10}{Length:5974}\\
+ & 1st Qu.:   63.631 & 1st Qu.:  21.9384 & 1st Qu.: 1.212 & 1st Qu.: 8.90 & 1st Qu.:  -0.5789 & 1st Qu.:-0.88313 & 1st Qu.:  1.228 & Class :character\\
+\cellcolor{gray!10}{} & \cellcolor{gray!10}{Median :  261.295} & \cellcolor{gray!10}{Median : 128.2416} & \cellcolor{gray!10}{Median : 3.663} & \cellcolor{gray!10}{Median :22.30} & \cellcolor{gray!10}{Median :   0.4574} & \cellcolor{gray!10}{Median :-0.00619} & \cellcolor{gray!10}{Median :  2.861} & \cellcolor{gray!10}{Mode  :character}\\
+ & Mean   :  959.978 & Mean   : 648.7002 & Mean   : 8.791 & Mean   :29.09 & Mean   :   0.3933 & Mean   :-0.04756 & Mean   :  7.939 & NA\\
+\cellcolor{gray!10}{} & \cellcolor{gray!10}{3rd Qu.:  890.483} & \cellcolor{gray!10}{3rd Qu.: 557.3557} & \cellcolor{gray!10}{3rd Qu.:10.632} & \cellcolor{gray!10}{3rd Qu.:45.30} & \cellcolor{gray!10}{3rd Qu.:   1.6167} & \cellcolor{gray!10}{3rd Qu.: 0.85004} & \cellcolor{gray!10}{3rd Qu.:  8.879} & \cellcolor{gray!10}{NA}\\
+\addlinespace
+ & Max.   :12434.434 & Max.   :7871.2450 & Max.   :88.404 & Max.   :89.20 & Max.   :  15.0306 & Max.   : 1.80099 & Max.   :138.774 & NA\\
+\cellcolor{gray!10}{} & \cellcolor{gray!10}{NA's   :1617} & \cellcolor{gray!10}{NA's   :1630} & \cellcolor{gray!10}{NA's   :5009} & \cellcolor{gray!10}{NA's   :4953} & \cellcolor{gray!10}{NA's   :458} & \cellcolor{gray!10}{NA's   :1112} & \cellcolor{gray!10}{NA's   :2755} & \cellcolor{gray!10}{NA}\\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{longtable}[]{@{}ll@{}}
+\caption{Data summary}\tabularnewline
+\toprule\noalign{}
+\endfirsthead
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Name & FirstCutData \\
+Number of rows & 5974 \\
+Number of columns & 32 \\
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \\
+Column type frequency: & \\
+character & 3 \\
+numeric & 29 \\
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \\
+Group variables & None \\
+\end{longtable}
+
+\textbf{Variable type: character}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1944}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1389}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1944}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0556}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0556}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0833}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1528}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+skim\_variable
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+n\_missing
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+complete\_rate
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+min
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+max
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+empty
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+n\_unique
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+whitespace
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+CountryCode & 0 & 1.00 & 3 & 9 & 0 & 206 & 0 \\
+CountryName & 319 & 0.95 & 4 & 38 & 0 & 195 & 0 \\
+Income Group & 377 & 0.94 & 10 & 19 & 0 & 4 & 0 \\
+\end{longtable}
+
+\textbf{Variable type: numeric}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.2232}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0893}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.1250}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0714}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0714}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0714}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0714}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0714}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0714}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0804}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 20\tabcolsep) * \real{0.0536}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+skim\_variable
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+n\_missing
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+complete\_rate
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+mean
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+sd
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+p0
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+p25
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+p50
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+p75
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+p100
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+hist
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+year & 0 & 1.00 & 2009.00 & 8.37 & 1995.00 & 2002.00 & 2009.00 & 2016.00
+& 2023.00 & ▇▇▇▇▇ \\
+HDI\_Index & 422 & 0.93 & 0.69 & 0.16 & 0.24 & 0.57 & 0.71 & 0.81 & 0.97
+& ▁▃▅▇▅ \\
+IHDI\_Index & 3677 & 0.38 & 0.58 & 0.20 & 0.13 & 0.40 & 0.59 & 0.75 &
+0.92 & ▂▇▇▇▇ \\
+GiniCoeff & 3670 & 0.39 & 21.32 & 11.35 & 4.82 & 11.06 & 19.18 & 31.88 &
+51.89 & ▇▆▃▅▁ \\
+FoodIndex & 720 & 0.88 & 91.33 & 28.06 & 17.00 & 76.57 & 94.52 & 102.80
+& 578.71 & ▇▁▁▁▁ \\
+CorruptionScore & 1204 & 0.80 & -0.06 & 1.00 & -1.97 & -0.82 & -0.30 &
+0.59 & 2.46 & ▃▇▅▃▂ \\
+ElectricAccess & 627 & 0.90 & 79.23 & 30.10 & 0.80 & 63.20 & 98.10 &
+100.00 & 100.00 & ▁▁▁▁▇ \\
+PopDensity & 583 & 0.90 & 298.20 & 1389.80 & 1.44 & 30.87 & 77.92 &
+176.61 & 18822.89 & ▇▁▁▁▁ \\
+PopInSlums & 4011 & 0.33 & 28.73 & 27.32 & 0.00 & 1.55 & 21.18 & 52.80 &
+99.81 & ▇▂▃▂▁ \\
+WaterStress & 1505 & 0.75 & 65.08 & 266.68 & 0.03 & 3.71 & 11.18 & 39.70
+& 3850.50 & ▇▁▁▁▁ \\
+BankingAccess & 5412 & 0.09 & 57.04 & 30.13 & 0.40 & 31.06 & 54.05 &
+86.76 & 100.00 & ▃▆▅▃▇ \\
+RnDInvest & 3666 & 0.39 & 0.97 & 0.98 & 0.01 & 0.24 & 0.60 & 1.39 & 6.02
+& ▇▂▁▁▁ \\
+GovtEffectiveness & 1223 & 0.80 & -0.06 & 1.00 & -2.44 & -0.79 & -0.20 &
+0.59 & 2.47 & ▂▇▇▃▂ \\
+ShippingIndex & 3592 & 0.40 & 25.14 & 25.22 & 0.60 & 7.54 & 15.17 &
+34.16 & 171.18 & ▇▂▁▁▁ \\
+FixedIntSubs & 2041 & 0.66 & 10.54 & 13.07 & 0.00 & 0.27 & 3.87 & 18.40
+& 62.21 & ▇▂▂▁▁ \\
+InternetUsersPct & 675 & 0.89 & 32.58 & 32.11 & 0.00 & 2.81 & 21.00 &
+61.40 & 100.00 & ▇▂▂▂▂ \\
+PoliticalStability & 1160 & 0.81 & -0.06 & 1.00 & -3.31 & -0.70 & 0.03 &
+0.79 & 1.76 & ▁▂▆▇▆ \\
+RuleOfLaw & 1114 & 0.81 & -0.06 & 0.99 & -2.59 & -0.82 & -0.21 & 0.69 &
+2.12 & ▁▆▇▆▃ \\
+RqdEduYears & 1432 & 0.76 & 9.42 & 2.25 & 4.00 & 8.00 & 9.00 & 11.00 &
+17.00 & ▃▇▆▃▁ \\
+GovtEduSpendPctGDP & 2288 & 0.62 & 4.42 & 1.89 & 0.00 & 3.14 & 4.23 &
+5.43 & 15.86 & ▃▇▂▁▁ \\
+MortalityFromDirtyness & 5791 & 0.03 & 16.96 & 21.65 & 0.40 & 2.95 &
+6.10 & 25.55 & 108.10 & ▇▂▁▁▁ \\
+UHCServiceCoverage & 4630 & 0.22 & 59.39 & 19.02 & 11.00 & 44.00 & 63.00
+& 75.00 & 91.00 & ▂▅▆▇▇ \\
+HealthSpendPerCapita & 1617 & 0.73 & 959.98 & 1689.18 & 4.18 & 63.63 &
+261.29 & 890.48 & 12434.43 & ▇▁▁▁▁ \\
+GovtHealthSpendPerCapita & 1630 & 0.73 & 648.70 & 1235.08 & 0.15 & 21.94
+& 128.24 & 557.36 & 7871.24 & ▇▁▁▁▁ \\
+MigrantsPct & 5009 & 0.16 & 8.79 & 13.58 & 0.04 & 1.21 & 3.66 & 10.63 &
+88.40 & ▇▁▁▁▁ \\
+FoodInsecurityPct & 4953 & 0.17 & 29.09 & 23.01 & 2.00 & 8.90 & 22.30 &
+45.30 & 89.20 & ▇▃▂▂▁ \\
+RuralPopulGrowth & 458 & 0.92 & 0.39 & 3.70 & -235.93 & -0.58 & 0.46 &
+1.62 & 15.03 & ▁▁▁▁▇ \\
+VoiceAccountability & 1112 & 0.81 & -0.05 & 1.00 & -2.31 & -0.88 & -0.01
+& 0.85 & 1.80 & ▃▇▇▇▇ \\
+Homicides & 2755 & 0.54 & 7.94 & 12.47 & 0.00 & 1.23 & 2.86 & 8.88 &
+138.77 & ▇▁▁▁▁ \\
+\end{longtable}
+
+\end{document}
