@@ -1,0 +1,29 @@
+---
+title: "Capstone R Work"
+author: "Barrett Viator and Ray Chandonnet"
+date: "2025-07-26"
+output: pdf_document
+header-includes:
+  - \usepackage{xcolor}
+---
+
+\textcolor{blue}{This code uses static data as its starting point rather than running a lengthy API call.  For production, to access realtime current data, this would be replaced by a call to the API using the reticulate functions that call Python code in R}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Load libraries as needed
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(readxl)
+```
+
+```{r ImportData}
+rawdata <- readRDS(here::here("Data","PreEDA_DataFrame.rds"))
+FieldActions <- read_excel(here::here("Data", "FieldActions.xlsx"))
+```
+
+
+```{r}
+
+```
