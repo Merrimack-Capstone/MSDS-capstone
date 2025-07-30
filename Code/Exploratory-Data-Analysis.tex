@@ -432,4 +432,817 @@ Homicides & 2755 & 0.54 & 7.94 & 12.47 & 0.00 & 1.23 & 2.86 & 8.88 &
 138.77 & ▇▁▁▁▁ \\
 \end{longtable}
 
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Filter complete cases again (just in case)}
+\FunctionTok{ggplot}\NormalTok{(FirstCutData, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ InternetUsersPct, }\AttributeTok{y =}\NormalTok{ HDI\_Index)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{, }\AttributeTok{color =} \StringTok{"steelblue"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{method =} \StringTok{"lm"}\NormalTok{, }\AttributeTok{se =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{color =} \StringTok{"darkred"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{stat\_poly\_eq}\NormalTok{(}
+    \FunctionTok{aes}\NormalTok{(}\AttributeTok{label =} \FunctionTok{after\_stat}\NormalTok{(rr.label)),}
+    \AttributeTok{formula =}\NormalTok{ y }\SpecialCharTok{\textasciitilde{}}\NormalTok{ x,}
+    \AttributeTok{parse =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{output.type =} \StringTok{"expression"}\NormalTok{,}
+    \AttributeTok{rr.digits =} \DecValTok{3}\NormalTok{,}
+    \AttributeTok{label.x =} \FloatTok{0.6}\NormalTok{,           }\CommentTok{\# X{-}position (adjust if needed)}
+    \AttributeTok{label.y =} \FloatTok{0.15}\NormalTok{,         }\CommentTok{\# Y{-}position (bottom{-}ish)}
+    \AttributeTok{color =} \StringTok{"darkred"}\NormalTok{,      }\CommentTok{\# Match regression line}
+    \AttributeTok{na.rm =} \ConstantTok{TRUE}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"HDI vs. Internet Access (All Countries)"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"Internet Access (\% of Population)"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"Human Development Index (HDI)"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `geom_smooth()` using formula = 'y ~ x'
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: Removed 978 rows containing non-finite outside the scale range
+## (`stat_smooth()`).
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: Removed 978 rows containing missing values or values outside the scale range
+## (`geom_point()`).
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/ScatterPlots-1.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{FirstCutDataFiltered }\OtherTok{\textless{}{-}}\NormalTok{ FirstCutData[}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(FirstCutData}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}}\NormalTok{), ]}
+\NormalTok{FirstCutDataFiltered}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}} \OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  FirstCutDataFiltered}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}}\NormalTok{,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Low income"}\NormalTok{, }\StringTok{"Lower middle income"}\NormalTok{, }\StringTok{"Upper middle income"}\NormalTok{, }\StringTok{"High income"}\NormalTok{)}
+\NormalTok{)}
+\FunctionTok{ggplot}\NormalTok{(FirstCutDataFiltered, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ InternetUsersPct, }\AttributeTok{y =}\NormalTok{ HDI\_Index, }\AttributeTok{color =} \StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{method =} \StringTok{"lm"}\NormalTok{, }\AttributeTok{se =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{stat\_poly\_eq}\NormalTok{(}
+    \FunctionTok{aes}\NormalTok{(}
+      \AttributeTok{label =} \FunctionTok{after\_stat}\NormalTok{(rr.label),}
+      \AttributeTok{group =} \StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}}\NormalTok{,}
+      \AttributeTok{color =} \StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}}
+\NormalTok{    ),}
+    \AttributeTok{formula =}\NormalTok{ y }\SpecialCharTok{\textasciitilde{}}\NormalTok{ x,}
+    \AttributeTok{parse =} \ConstantTok{FALSE}\NormalTok{,}
+    \AttributeTok{output.type =} \StringTok{"text"}\NormalTok{,}
+    \AttributeTok{rr.digits =} \DecValTok{3}\NormalTok{,}
+    \AttributeTok{label.x =} \FloatTok{0.6}\NormalTok{,}
+    \AttributeTok{label.y =} \FunctionTok{c}\NormalTok{(}\FloatTok{0.15}\NormalTok{, }\FloatTok{0.2}\NormalTok{, }\FloatTok{0.25}\NormalTok{, }\FloatTok{0.3}\NormalTok{),  }\CommentTok{\# Stack in bottom right}
+    \AttributeTok{na.rm =} \ConstantTok{TRUE}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"HDI vs. Internet Access by Income Group"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"Internet Access (\% of Population)"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"Human Development Index (HDI)"}\NormalTok{,}
+    \AttributeTok{color =} \StringTok{"Income Group"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `geom_smooth()` using formula = 'y ~ x'
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: Removed 646 rows containing non-finite outside the scale range
+## (`stat_smooth()`).
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: Removed 646 rows containing missing values or values outside the scale range
+## (`geom_point()`).
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/ScatterPlots-2.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{FirstCutDataFiltered }\OtherTok{\textless{}{-}}\NormalTok{ FirstCutData[}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(FirstCutData}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}}\NormalTok{), ]}
+
+\NormalTok{FirstCutDataFiltered}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}} \OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  FirstCutDataFiltered}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}}\NormalTok{,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Low income"}\NormalTok{, }\StringTok{"Lower middle income"}\NormalTok{, }\StringTok{"Upper middle income"}\NormalTok{, }\StringTok{"High income"}\NormalTok{)}
+\NormalTok{)}
+
+\NormalTok{FirstCutDataFilteredClean }\OtherTok{\textless{}{-}}\NormalTok{ FirstCutDataFiltered }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(InternetUsersPct))}
+
+
+\FunctionTok{ggplot}\NormalTok{(FirstCutDataFilteredClean, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ InternetUsersPct, }\AttributeTok{fill =} \StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_histogram}\NormalTok{(}
+    \FunctionTok{aes}\NormalTok{(}\AttributeTok{y =} \FunctionTok{after\_stat}\NormalTok{(count }\SpecialCharTok{/} \FunctionTok{tapply}\NormalTok{(count, PANEL, sum)[}\FunctionTok{as.integer}\NormalTok{(PANEL)])),}
+    \AttributeTok{binwidth =} \DecValTok{5}\NormalTok{,}
+    \AttributeTok{color =} \StringTok{"black"}\NormalTok{,}
+    \AttributeTok{alpha =} \FloatTok{0.8}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}} \StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}}\NormalTok{, }\AttributeTok{scales =} \StringTok{"free\_y"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_y\_continuous}\NormalTok{(}\AttributeTok{labels =}\NormalTok{ scales}\SpecialCharTok{::}\FunctionTok{percent\_format}\NormalTok{(}\AttributeTok{accuracy =} \DecValTok{1}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{scale\_x\_continuous}\NormalTok{(}
+    \AttributeTok{breaks =} \FunctionTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{100}\NormalTok{, }\AttributeTok{by =} \DecValTok{10}\NormalTok{),}
+    \AttributeTok{labels =} \ControlFlowTok{function}\NormalTok{(x) }\FunctionTok{paste0}\NormalTok{(x, }\StringTok{"\%"}\NormalTok{)}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"Distribution of Internet Access by Income Group"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"Internet Access (\% of Population)"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"Percent of Observations"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}
+    \AttributeTok{strip.text =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{),}
+    \AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle =} \DecValTok{45}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{),}
+    \AttributeTok{legend.position =} \StringTok{"none"}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/InternetDistributionPlots-1.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Step 1: Filter to only rows with Internet Access under 5\%}
+\CommentTok{\# Bin and summarize within the 0\%–5\% range}
+\CommentTok{\# Bin and summarize within the 0\%–5\% range}
+\NormalTok{zoom\_data }\OtherTok{\textless{}{-}}\NormalTok{ FirstCutDataFiltered }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(InternetUsersPct }\SpecialCharTok{\textgreater{}=} \DecValTok{0}\NormalTok{, InternetUsersPct }\SpecialCharTok{\textless{}} \DecValTok{5}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{Bin =} \FunctionTok{cut}\NormalTok{(}
+\NormalTok{    InternetUsersPct,}
+    \AttributeTok{breaks =} \FunctionTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{5}\NormalTok{, }\AttributeTok{by =} \DecValTok{1}\NormalTok{),}
+    \AttributeTok{include.lowest =} \ConstantTok{TRUE}\NormalTok{,}
+    \AttributeTok{right =} \ConstantTok{FALSE}\NormalTok{,}
+    \AttributeTok{labels =} \FunctionTok{c}\NormalTok{(}\StringTok{"0–1\%"}\NormalTok{, }\StringTok{"1–2\%"}\NormalTok{, }\StringTok{"2–3\%"}\NormalTok{, }\StringTok{"3–4\%"}\NormalTok{, }\StringTok{"4–5\%"}\NormalTok{)}
+\NormalTok{  ))}
+
+\CommentTok{\# Group totals for each Income Group (full data)}
+\NormalTok{group\_totals }\OtherTok{\textless{}{-}}\NormalTok{ FirstCutDataFiltered }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{count}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}}\NormalTok{, }\AttributeTok{name =} \StringTok{"GroupTotal"}\NormalTok{)}
+
+\CommentTok{\# Bin counts and percentages}
+\NormalTok{zoom\_summary }\OtherTok{\textless{}{-}}\NormalTok{ zoom\_data }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{count}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}}\NormalTok{, Bin, }\AttributeTok{name =} \StringTok{"BinCount"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{left\_join}\NormalTok{(group\_totals, }\AttributeTok{by =} \StringTok{"Income Group"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{Percent =}\NormalTok{ BinCount }\SpecialCharTok{/}\NormalTok{ GroupTotal)}
+
+\CommentTok{\# Plot}
+\FunctionTok{ggplot}\NormalTok{(zoom\_summary, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Bin, }\AttributeTok{y =}\NormalTok{ Percent, }\AttributeTok{fill =} \StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_col}\NormalTok{(}\AttributeTok{color =} \StringTok{"black"}\NormalTok{, }\AttributeTok{width =} \FloatTok{0.9}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}} \StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}}\NormalTok{, }\AttributeTok{scales =} \StringTok{"free\_y"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_y\_continuous}\NormalTok{(}\AttributeTok{labels =}\NormalTok{ scales}\SpecialCharTok{::}\FunctionTok{percent\_format}\NormalTok{(}\AttributeTok{accuracy =} \DecValTok{1}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"Zoomed View: Internet Access Below 5\% by Income Group"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"Internet Access (\% of Population)"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"Percent of Observations"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}
+    \AttributeTok{strip.text =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{size =} \DecValTok{12}\NormalTok{),}
+    \AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle =} \DecValTok{0}\NormalTok{, }\AttributeTok{hjust =} \FloatTok{0.5}\NormalTok{),}
+    \AttributeTok{legend.position =} \StringTok{"none"}
+\NormalTok{  ) }
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/InternetDistributionPlots-2.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ggplot}\NormalTok{(FirstCutDataFiltered, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}}\NormalTok{, }\AttributeTok{y =}\NormalTok{ HDI\_Index, }\AttributeTok{fill =} \StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_violin}\NormalTok{(}\AttributeTok{trim =} \ConstantTok{FALSE}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_jitter}\NormalTok{(}\AttributeTok{width =} \FloatTok{0.15}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.3}\NormalTok{, }\AttributeTok{color =} \StringTok{"black"}\NormalTok{, }\AttributeTok{size =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"Distribution of HDI by Income Group"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"Income Group"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"Human Development Index (HDI)"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{14}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}
+    \AttributeTok{legend.position =} \StringTok{"none"}\NormalTok{,}
+    \AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{),}
+    \AttributeTok{axis.title.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{),}
+    \AttributeTok{axis.title.y =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{)}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: Removed 417 rows containing non-finite outside the scale range
+## (`stat_ydensity()`).
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: Removed 417 rows containing missing values or values outside the scale range
+## (`geom_point()`).
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/ViolinPlots-1.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ggplot}\NormalTok{(FirstCutDataFiltered, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}}\NormalTok{, }\AttributeTok{y =}\NormalTok{ InternetUsersPct, }\AttributeTok{fill =} \StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_violin}\NormalTok{(}\AttributeTok{trim =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{color =} \StringTok{"black"}\NormalTok{, }\AttributeTok{adjust =} \FloatTok{1.2}\NormalTok{) }\SpecialCharTok{+}  \CommentTok{\# trim removes tails beyond the data}
+  \FunctionTok{geom\_jitter}\NormalTok{(}\AttributeTok{width =} \FloatTok{0.2}\NormalTok{, }\AttributeTok{size =} \DecValTok{1}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.5}\NormalTok{, }\AttributeTok{color =} \StringTok{"black"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_y\_continuous}\NormalTok{(}\AttributeTok{limits =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{100}\NormalTok{), }\AttributeTok{expand =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{0}\NormalTok{)) }\SpecialCharTok{+}  \CommentTok{\# Hard clip y{-}axis}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"Distribution of Internet Access by Income Group"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"Internet Access (\% of Population)"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"Income Group"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}
+    \AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{hjust =} \FloatTok{0.5}\NormalTok{, }\AttributeTok{face =} \StringTok{"bold"}\NormalTok{),}
+    \AttributeTok{axis.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{),}
+    \AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{),}
+    \AttributeTok{legend.position =} \StringTok{"none"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"Low income"} \OtherTok{=} \StringTok{"\#F8766D"}\NormalTok{,}
+    \StringTok{"Lower middle income"} \OtherTok{=} \StringTok{"\#7CAE00"}\NormalTok{,}
+    \StringTok{"Upper middle income"} \OtherTok{=} \StringTok{"\#00BFC4"}\NormalTok{,}
+    \StringTok{"High income"} \OtherTok{=} \StringTok{"\#C77CFF"}
+\NormalTok{  ))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: Removed 348 rows containing non-finite outside the scale range
+## (`stat_ydensity()`).
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: Removed 370 rows containing missing values or values outside the scale range
+## (`geom_point()`).
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/ViolinPlots-2.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Step 1: Select only numeric columns and drop unwanted ones}
+\NormalTok{numeric\_vars }\OtherTok{\textless{}{-}}\NormalTok{ FirstCutData }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(}\FunctionTok{where}\NormalTok{(is.numeric)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{year)  }\CommentTok{\# Drop the \textquotesingle{}Year\textquotesingle{} column}
+
+\CommentTok{\# Step 2: Compute correlation matrix using pairwise complete observations}
+\NormalTok{cor\_matrix }\OtherTok{\textless{}{-}} \FunctionTok{cor}\NormalTok{(numeric\_vars, }\AttributeTok{use =} \StringTok{"pairwise.complete.obs"}\NormalTok{, }\AttributeTok{method =} \StringTok{"pearson"}\NormalTok{)}
+\NormalTok{cor\_matrix\_90 }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(}\FunctionTok{abs}\NormalTok{(cor\_matrix) }\SpecialCharTok{\textgreater{}=} \FloatTok{0.9}\NormalTok{, cor\_matrix, }\ConstantTok{NA}\NormalTok{)}
+\NormalTok{cor\_matrix\_70\_90 }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(}\FunctionTok{abs}\NormalTok{(cor\_matrix) }\SpecialCharTok{\textgreater{}=} \FloatTok{0.7} \SpecialCharTok{\&} \FunctionTok{abs}\NormalTok{(cor\_matrix) }\SpecialCharTok{\textless{}} \FloatTok{0.9}\NormalTok{, cor\_matrix, }\ConstantTok{NA}\NormalTok{)}
+
+
+\CommentTok{\# Step 3: Plot correlation heatmap}
+\FunctionTok{corrplot}\NormalTok{(cor\_matrix,}
+         \AttributeTok{method =} \StringTok{"color"}\NormalTok{,}
+         \AttributeTok{type =} \StringTok{"lower"}\NormalTok{,}
+         \AttributeTok{tl.col =} \StringTok{"black"}\NormalTok{,}
+         \AttributeTok{tl.cex =} \FloatTok{0.7}\NormalTok{,}
+         \AttributeTok{col =} \FunctionTok{colorRampPalette}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{"blue"}\NormalTok{, }\StringTok{"white"}\NormalTok{, }\StringTok{"red"}\NormalTok{))(}\DecValTok{200}\NormalTok{),}
+         \AttributeTok{diag =} \ConstantTok{FALSE}\NormalTok{)}
+\FunctionTok{title}\NormalTok{(}\StringTok{"Correlation Heatmap of Numeric Predictors {-} ALL"}\NormalTok{, }\AttributeTok{line =} \DecValTok{1}\NormalTok{, }\AttributeTok{cex.main =} \FloatTok{1.2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/Correlation-1.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Plot only strong correlations}
+\FunctionTok{corrplot}\NormalTok{(cor\_matrix\_90,}
+         \AttributeTok{method =} \StringTok{"color"}\NormalTok{,}
+         \AttributeTok{type =} \StringTok{"lower"}\NormalTok{,}
+         \AttributeTok{tl.col =} \StringTok{"black"}\NormalTok{,}
+         \AttributeTok{tl.cex =} \FloatTok{0.7}\NormalTok{,}
+         \AttributeTok{col =} \FunctionTok{colorRampPalette}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{"blue"}\NormalTok{, }\StringTok{"white"}\NormalTok{, }\StringTok{"red"}\NormalTok{))(}\DecValTok{200}\NormalTok{),}
+         \AttributeTok{diag =} \ConstantTok{FALSE}\NormalTok{,}
+         \AttributeTok{na.label =} \StringTok{" "}\NormalTok{)  }\CommentTok{\# blank for missing (non{-}displayed) values}
+\FunctionTok{title}\NormalTok{(}\StringTok{"Correlation Heatmap of Numeric Predictors {-} 90\%+ correlation (DROP)"}\NormalTok{, }\AttributeTok{line =} \DecValTok{1}\NormalTok{, }\AttributeTok{cex.main =} \FloatTok{1.2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/Correlation-2.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{corrplot}\NormalTok{(cor\_matrix\_70\_90,}
+         \AttributeTok{method =} \StringTok{"color"}\NormalTok{,}
+         \AttributeTok{type =} \StringTok{"lower"}\NormalTok{,}
+         \AttributeTok{tl.col =} \StringTok{"black"}\NormalTok{,}
+         \AttributeTok{tl.cex =} \FloatTok{0.7}\NormalTok{,}
+         \AttributeTok{col =} \FunctionTok{colorRampPalette}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{"blue"}\NormalTok{, }\StringTok{"white"}\NormalTok{, }\StringTok{"red"}\NormalTok{))(}\DecValTok{200}\NormalTok{),}
+         \AttributeTok{diag =} \ConstantTok{FALSE}\NormalTok{,}
+         \AttributeTok{na.label =} \StringTok{" "}\NormalTok{)  }\CommentTok{\# blank for missing (non{-}displayed) values}
+\FunctionTok{title}\NormalTok{(}\StringTok{"Correlation Heatmap of Numeric Predictors {-} 70\%{-}90\%+ correlation (VIF)"}\NormalTok{, }\AttributeTok{line =} \DecValTok{1}\NormalTok{, }\AttributeTok{cex.main =} \FloatTok{1.2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/Correlation-3.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Step 2: Compute Pearson correlation matrix using pairwise complete observations}
+\NormalTok{cor\_matrix }\OtherTok{\textless{}{-}} \FunctionTok{cor}\NormalTok{(numeric\_vars, }\AttributeTok{use =} \StringTok{"pairwise.complete.obs"}\NormalTok{, }\AttributeTok{method =} \StringTok{"pearson"}\NormalTok{)}
+
+\CommentTok{\# Step 3 Print}
+\CommentTok{\# Get total number of columns}
+\NormalTok{cols }\OtherTok{\textless{}{-}} \FunctionTok{ncol}\NormalTok{(cor\_matrix)}
+\NormalTok{col\_names }\OtherTok{\textless{}{-}} \FunctionTok{colnames}\NormalTok{(cor\_matrix)}
+
+\CommentTok{\# Loop through and print in chunks}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \FunctionTok{seq}\NormalTok{(}\DecValTok{1}\NormalTok{, cols, }\AttributeTok{by =}\NormalTok{ cols\_per\_table)) \{}
+  \CommentTok{\# Subset the matrix}
+\NormalTok{  end\_col }\OtherTok{\textless{}{-}} \FunctionTok{min}\NormalTok{(i }\SpecialCharTok{+}\NormalTok{ cols\_per\_table }\SpecialCharTok{{-}} \DecValTok{1}\NormalTok{, cols)}
+\NormalTok{  sub\_matrix }\OtherTok{\textless{}{-}}\NormalTok{ cor\_matrix[, i}\SpecialCharTok{:}\NormalTok{end\_col]}
+  
+  \CommentTok{\# Print each chunk with a dynamic caption}
+  \FunctionTok{cat}\NormalTok{(}
+    \FunctionTok{asis\_output}\NormalTok{(}
+      \FunctionTok{kable}\NormalTok{(}
+        \FunctionTok{round}\NormalTok{(sub\_matrix, }\DecValTok{2}\NormalTok{), }
+        \AttributeTok{format =} \StringTok{"latex"}\NormalTok{, }
+        \AttributeTok{booktabs =} \ConstantTok{TRUE}\NormalTok{,}
+        \AttributeTok{caption =} \FunctionTok{paste0}\NormalTok{(}\StringTok{"Correlation Matrix: Columns "}\NormalTok{, i, }\StringTok{" to "}\NormalTok{, end\_col)) }\SpecialCharTok{\%\textgreater{}\%}
+        \FunctionTok{kable\_styling}\NormalTok{(}\AttributeTok{latex\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"HOLD\_Position"}\NormalTok{, }\StringTok{"striped"}\NormalTok{, }\StringTok{"scale\_down"}\NormalTok{))}
+\NormalTok{      )}
+\NormalTok{  )}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{table}
+\centering
+\caption{\label{tab:Correlation}Correlation Matrix: Columns 1 to 8}
+\centering
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
+\begin{tabular}[t]{lrrrrrrrr}
+\toprule
+  & HDI\_Index & IHDI\_Index & GiniCoeff & FoodIndex & CorruptionScore & ElectricAccess & PopDensity & PopInSlums\\
+\midrule
+\cellcolor{gray!10}{HDI\_Index} & \cellcolor{gray!10}{1.00} & \cellcolor{gray!10}{0.98} & \cellcolor{gray!10}{-0.92} & \cellcolor{gray!10}{0.29} & \cellcolor{gray!10}{0.71} & \cellcolor{gray!10}{0.85} & \cellcolor{gray!10}{0.17} & \cellcolor{gray!10}{-0.82}\\
+IHDI\_Index & 0.98 & 1.00 & -0.97 & -0.10 & 0.72 & 0.80 & 0.14 & -0.85\\
+\cellcolor{gray!10}{GiniCoeff} & \cellcolor{gray!10}{-0.92} & \cellcolor{gray!10}{-0.97} & \cellcolor{gray!10}{1.00} & \cellcolor{gray!10}{0.10} & \cellcolor{gray!10}{-0.62} & \cellcolor{gray!10}{-0.79} & \cellcolor{gray!10}{-0.09} & \cellcolor{gray!10}{0.84}\\
+FoodIndex & 0.29 & -0.10 & 0.10 & 1.00 & 0.13 & 0.20 & 0.08 & -0.20\\
+\cellcolor{gray!10}{CorruptionScore} & \cellcolor{gray!10}{0.71} & \cellcolor{gray!10}{0.72} & \cellcolor{gray!10}{-0.62} & \cellcolor{gray!10}{0.13} & \cellcolor{gray!10}{1.00} & \cellcolor{gray!10}{0.47} & \cellcolor{gray!10}{0.20} & \cellcolor{gray!10}{-0.57}\\
+\addlinespace
+ElectricAccess & 0.85 & 0.80 & -0.79 & 0.20 & 0.47 & 1.00 & 0.10 & -0.75\\
+\cellcolor{gray!10}{PopDensity} & \cellcolor{gray!10}{0.17} & \cellcolor{gray!10}{0.14} & \cellcolor{gray!10}{-0.09} & \cellcolor{gray!10}{0.08} & \cellcolor{gray!10}{0.20} & \cellcolor{gray!10}{0.10} & \cellcolor{gray!10}{1.00} & \cellcolor{gray!10}{-0.11}\\
+PopInSlums & -0.82 & -0.85 & 0.84 & -0.20 & -0.57 & -0.75 & -0.11 & 1.00\\
+\cellcolor{gray!10}{WaterStress} & \cellcolor{gray!10}{0.12} & \cellcolor{gray!10}{0.08} & \cellcolor{gray!10}{-0.08} & \cellcolor{gray!10}{0.01} & \cellcolor{gray!10}{0.04} & \cellcolor{gray!10}{0.13} & \cellcolor{gray!10}{0.05} & \cellcolor{gray!10}{-0.14}\\
+BankingAccess & 0.82 & 0.81 & -0.72 & 0.04 & 0.75 & 0.56 & 0.18 & -0.69\\
+\addlinespace
+\cellcolor{gray!10}{RnDInvest} & \cellcolor{gray!10}{0.63} & \cellcolor{gray!10}{0.62} & \cellcolor{gray!10}{-0.47} & \cellcolor{gray!10}{0.12} & \cellcolor{gray!10}{0.69} & \cellcolor{gray!10}{0.27} & \cellcolor{gray!10}{0.07} & \cellcolor{gray!10}{-0.47}\\
+GovtEffectiveness & 0.79 & 0.83 & -0.74 & 0.12 & 0.92 & 0.57 & 0.22 & -0.64\\
+\cellcolor{gray!10}{ShippingIndex} & \cellcolor{gray!10}{0.46} & \cellcolor{gray!10}{0.46} & \cellcolor{gray!10}{-0.38} & \cellcolor{gray!10}{0.10} & \cellcolor{gray!10}{0.35} & \cellcolor{gray!10}{0.34} & \cellcolor{gray!10}{0.34} & \cellcolor{gray!10}{-0.36}\\
+FixedIntSubs & 0.73 & 0.88 & -0.80 & 0.14 & 0.64 & 0.47 & 0.24 & -0.57\\
+\cellcolor{gray!10}{InternetUsersPct} & \cellcolor{gray!10}{0.72} & \cellcolor{gray!10}{0.87} & \cellcolor{gray!10}{-0.82} & \cellcolor{gray!10}{0.29} & \cellcolor{gray!10}{0.56} & \cellcolor{gray!10}{0.55} & \cellcolor{gray!10}{0.15} & \cellcolor{gray!10}{-0.64}\\
+\addlinespace
+PoliticalStability & 0.59 & 0.63 & -0.58 & 0.10 & 0.75 & 0.41 & 0.14 & -0.56\\
+\cellcolor{gray!10}{RuleOfLaw} & \cellcolor{gray!10}{0.74} & \cellcolor{gray!10}{0.77} & \cellcolor{gray!10}{-0.68} & \cellcolor{gray!10}{0.13} & \cellcolor{gray!10}{0.94} & \cellcolor{gray!10}{0.50} & \cellcolor{gray!10}{0.18} & \cellcolor{gray!10}{-0.63}\\
+RqdEduYears & 0.41 & 0.39 & -0.38 & 0.13 & 0.26 & 0.42 & -0.01 & -0.36\\
+\cellcolor{gray!10}{GovtEduSpendPctGDP} & \cellcolor{gray!10}{0.26} & \cellcolor{gray!10}{0.28} & \cellcolor{gray!10}{-0.28} & \cellcolor{gray!10}{0.11} & \cellcolor{gray!10}{0.35} & \cellcolor{gray!10}{0.20} & \cellcolor{gray!10}{-0.15} & \cellcolor{gray!10}{-0.33}\\
+MortalityFromDirtyness & -0.80 & -0.79 & 0.80 & 0.15 & -0.42 & -0.82 & -0.07 & 1.00\\
+\addlinespace
+\cellcolor{gray!10}{UHCServiceCoverage} & \cellcolor{gray!10}{0.92} & \cellcolor{gray!10}{0.92} & \cellcolor{gray!10}{-0.86} & \cellcolor{gray!10}{0.25} & \cellcolor{gray!10}{0.61} & \cellcolor{gray!10}{0.81} & \cellcolor{gray!10}{0.13} & \cellcolor{gray!10}{-0.79}\\
+HealthSpendPerCapita & 0.64 & 0.68 & -0.57 & 0.09 & 0.73 & 0.36 & 0.26 & -0.48\\
+\cellcolor{gray!10}{GovtHealthSpendPerCapita} & \cellcolor{gray!10}{0.63} & \cellcolor{gray!10}{0.67} & \cellcolor{gray!10}{-0.57} & \cellcolor{gray!10}{0.09} & \cellcolor{gray!10}{0.72} & \cellcolor{gray!10}{0.35} & \cellcolor{gray!10}{0.29} & \cellcolor{gray!10}{-0.47}\\
+MigrantsPct & 0.41 & 0.50 & -0.41 & 0.06 & 0.43 & 0.34 & 0.37 & -0.38\\
+\cellcolor{gray!10}{FoodInsecurityPct} & \cellcolor{gray!10}{-0.83} & \cellcolor{gray!10}{-0.85} & \cellcolor{gray!10}{0.84} & \cellcolor{gray!10}{0.14} & \cellcolor{gray!10}{-0.62} & \cellcolor{gray!10}{-0.78} & \cellcolor{gray!10}{-0.13} & \cellcolor{gray!10}{0.77}\\
+\addlinespace
+RuralPopulGrowth & -0.24 & -0.52 & 0.50 & -0.02 & -0.30 & -0.23 & -0.03 & 0.48\\
+\cellcolor{gray!10}{VoiceAccountability} & \cellcolor{gray!10}{0.59} & \cellcolor{gray!10}{0.65} & \cellcolor{gray!10}{-0.58} & \cellcolor{gray!10}{0.10} & \cellcolor{gray!10}{0.77} & \cellcolor{gray!10}{0.40} & \cellcolor{gray!10}{0.08} & \cellcolor{gray!10}{-0.55}\\
+Homicides & -0.24 & -0.30 & 0.26 & -0.01 & -0.24 & -0.06 & -0.09 & 0.17\\
+\bottomrule
+\end{tabular}}
+\end{table}\begin{table}
+\centering
+\caption{\label{tab:Correlation}Correlation Matrix: Columns 9 to 16}
+\centering
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
+\begin{tabular}[t]{lrrrrrrrr}
+\toprule
+  & WaterStress & BankingAccess & RnDInvest & GovtEffectiveness & ShippingIndex & FixedIntSubs & InternetUsersPct & PoliticalStability\\
+\midrule
+\cellcolor{gray!10}{HDI\_Index} & \cellcolor{gray!10}{0.12} & \cellcolor{gray!10}{0.82} & \cellcolor{gray!10}{0.63} & \cellcolor{gray!10}{0.79} & \cellcolor{gray!10}{0.46} & \cellcolor{gray!10}{0.73} & \cellcolor{gray!10}{0.72} & \cellcolor{gray!10}{0.59}\\
+IHDI\_Index & 0.08 & 0.81 & 0.62 & 0.83 & 0.46 & 0.88 & 0.87 & 0.63\\
+\cellcolor{gray!10}{GiniCoeff} & \cellcolor{gray!10}{-0.08} & \cellcolor{gray!10}{-0.72} & \cellcolor{gray!10}{-0.47} & \cellcolor{gray!10}{-0.74} & \cellcolor{gray!10}{-0.38} & \cellcolor{gray!10}{-0.80} & \cellcolor{gray!10}{-0.82} & \cellcolor{gray!10}{-0.58}\\
+FoodIndex & 0.01 & 0.04 & 0.12 & 0.12 & 0.10 & 0.14 & 0.29 & 0.10\\
+\cellcolor{gray!10}{CorruptionScore} & \cellcolor{gray!10}{0.04} & \cellcolor{gray!10}{0.75} & \cellcolor{gray!10}{0.69} & \cellcolor{gray!10}{0.92} & \cellcolor{gray!10}{0.35} & \cellcolor{gray!10}{0.64} & \cellcolor{gray!10}{0.56} & \cellcolor{gray!10}{0.75}\\
+\addlinespace
+ElectricAccess & 0.13 & 0.56 & 0.27 & 0.57 & 0.34 & 0.47 & 0.55 & 0.41\\
+\cellcolor{gray!10}{PopDensity} & \cellcolor{gray!10}{0.05} & \cellcolor{gray!10}{0.18} & \cellcolor{gray!10}{0.07} & \cellcolor{gray!10}{0.22} & \cellcolor{gray!10}{0.34} & \cellcolor{gray!10}{0.24} & \cellcolor{gray!10}{0.15} & \cellcolor{gray!10}{0.14}\\
+PopInSlums & -0.14 & -0.69 & -0.47 & -0.64 & -0.36 & -0.57 & -0.64 & -0.56\\
+\cellcolor{gray!10}{WaterStress} & \cellcolor{gray!10}{1.00} & \cellcolor{gray!10}{0.08} & \cellcolor{gray!10}{-0.08} & \cellcolor{gray!10}{0.04} & \cellcolor{gray!10}{0.05} & \cellcolor{gray!10}{-0.04} & \cellcolor{gray!10}{0.10} & \cellcolor{gray!10}{0.03}\\
+BankingAccess & 0.08 & 1.00 & 0.66 & 0.80 & 0.49 & 0.81 & 0.81 & 0.65\\
+\addlinespace
+\cellcolor{gray!10}{RnDInvest} & \cellcolor{gray!10}{-0.08} & \cellcolor{gray!10}{0.66} & \cellcolor{gray!10}{1.00} & \cellcolor{gray!10}{0.72} & \cellcolor{gray!10}{0.46} & \cellcolor{gray!10}{0.59} & \cellcolor{gray!10}{0.49} & \cellcolor{gray!10}{0.43}\\
+GovtEffectiveness & 0.04 & 0.80 & 0.72 & 1.00 & 0.49 & 0.69 & 0.62 & 0.71\\
+\cellcolor{gray!10}{ShippingIndex} & \cellcolor{gray!10}{0.05} & \cellcolor{gray!10}{0.49} & \cellcolor{gray!10}{0.46} & \cellcolor{gray!10}{0.49} & \cellcolor{gray!10}{1.00} & \cellcolor{gray!10}{0.49} & \cellcolor{gray!10}{0.46} & \cellcolor{gray!10}{0.09}\\
+FixedIntSubs & -0.04 & 0.81 & 0.59 & 0.69 & 0.49 & 1.00 & 0.83 & 0.46\\
+\cellcolor{gray!10}{InternetUsersPct} & \cellcolor{gray!10}{0.10} & \cellcolor{gray!10}{0.81} & \cellcolor{gray!10}{0.49} & \cellcolor{gray!10}{0.62} & \cellcolor{gray!10}{0.46} & \cellcolor{gray!10}{0.83} & \cellcolor{gray!10}{1.00} & \cellcolor{gray!10}{0.41}\\
+\addlinespace
+PoliticalStability & 0.03 & 0.65 & 0.43 & 0.71 & 0.09 & 0.46 & 0.41 & 1.00\\
+\cellcolor{gray!10}{RuleOfLaw} & \cellcolor{gray!10}{0.05} & \cellcolor{gray!10}{0.78} & \cellcolor{gray!10}{0.70} & \cellcolor{gray!10}{0.94} & \cellcolor{gray!10}{0.39} & \cellcolor{gray!10}{0.65} & \cellcolor{gray!10}{0.57} & \cellcolor{gray!10}{0.78}\\
+RqdEduYears & -0.02 & 0.23 & 0.11 & 0.28 & 0.16 & 0.32 & 0.38 & 0.20\\
+\cellcolor{gray!10}{GovtEduSpendPctGDP} & \cellcolor{gray!10}{0.06} & \cellcolor{gray!10}{0.36} & \cellcolor{gray!10}{0.32} & \cellcolor{gray!10}{0.27} & \cellcolor{gray!10}{-0.02} & \cellcolor{gray!10}{0.12} & \cellcolor{gray!10}{0.17} & \cellcolor{gray!10}{0.33}\\
+MortalityFromDirtyness & -0.12 & NA & -0.23 & -0.57 & -0.27 & -0.56 & -0.76 & -0.45\\
+\addlinespace
+\cellcolor{gray!10}{UHCServiceCoverage} & \cellcolor{gray!10}{0.10} & \cellcolor{gray!10}{0.76} & \cellcolor{gray!10}{0.54} & \cellcolor{gray!10}{0.70} & \cellcolor{gray!10}{0.46} & \cellcolor{gray!10}{0.73} & \cellcolor{gray!10}{0.82} & \cellcolor{gray!10}{0.51}\\
+HealthSpendPerCapita & 0.01 & 0.66 & 0.71 & 0.72 & 0.43 & 0.75 & 0.64 & 0.46\\
+\cellcolor{gray!10}{GovtHealthSpendPerCapita} & \cellcolor{gray!10}{0.02} & \cellcolor{gray!10}{0.66} & \cellcolor{gray!10}{0.69} & \cellcolor{gray!10}{0.71} & \cellcolor{gray!10}{0.39} & \cellcolor{gray!10}{0.74} & \cellcolor{gray!10}{0.63} & \cellcolor{gray!10}{0.46}\\
+MigrantsPct & 0.61 & NA & 0.21 & 0.43 & 0.17 & 0.35 & 0.37 & 0.36\\
+\cellcolor{gray!10}{FoodInsecurityPct} & \cellcolor{gray!10}{-0.08} & \cellcolor{gray!10}{-0.69} & \cellcolor{gray!10}{-0.49} & \cellcolor{gray!10}{-0.74} & \cellcolor{gray!10}{-0.47} & \cellcolor{gray!10}{-0.72} & \cellcolor{gray!10}{-0.77} & \cellcolor{gray!10}{-0.51}\\
+\addlinespace
+RuralPopulGrowth & -0.13 & -0.44 & -0.05 & -0.31 & -0.24 & -0.12 & -0.16 & -0.31\\
+\cellcolor{gray!10}{VoiceAccountability} & \cellcolor{gray!10}{-0.14} & \cellcolor{gray!10}{0.65} & \cellcolor{gray!10}{0.54} & \cellcolor{gray!10}{0.75} & \cellcolor{gray!10}{0.13} & \cellcolor{gray!10}{0.54} & \cellcolor{gray!10}{0.44} & \cellcolor{gray!10}{0.68}\\
+Homicides & -0.09 & -0.28 & -0.31 & -0.24 & -0.23 & -0.22 & -0.20 & -0.18\\
+\bottomrule
+\end{tabular}}
+\end{table}\begin{table}
+\centering
+\caption{\label{tab:Correlation}Correlation Matrix: Columns 17 to 24}
+\centering
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
+\begin{tabular}[t]{lrrrrrrrr}
+\toprule
+  & RuleOfLaw & RqdEduYears & GovtEduSpendPctGDP & MortalityFromDirtyness & UHCServiceCoverage & HealthSpendPerCapita & GovtHealthSpendPerCapita & MigrantsPct\\
+\midrule
+\cellcolor{gray!10}{HDI\_Index} & \cellcolor{gray!10}{0.74} & \cellcolor{gray!10}{0.41} & \cellcolor{gray!10}{0.26} & \cellcolor{gray!10}{-0.80} & \cellcolor{gray!10}{0.92} & \cellcolor{gray!10}{0.64} & \cellcolor{gray!10}{0.63} & \cellcolor{gray!10}{0.41}\\
+IHDI\_Index & 0.77 & 0.39 & 0.28 & -0.79 & 0.92 & 0.68 & 0.67 & 0.50\\
+\cellcolor{gray!10}{GiniCoeff} & \cellcolor{gray!10}{-0.68} & \cellcolor{gray!10}{-0.38} & \cellcolor{gray!10}{-0.28} & \cellcolor{gray!10}{0.80} & \cellcolor{gray!10}{-0.86} & \cellcolor{gray!10}{-0.57} & \cellcolor{gray!10}{-0.57} & \cellcolor{gray!10}{-0.41}\\
+FoodIndex & 0.13 & 0.13 & 0.11 & 0.15 & 0.25 & 0.09 & 0.09 & 0.06\\
+\cellcolor{gray!10}{CorruptionScore} & \cellcolor{gray!10}{0.94} & \cellcolor{gray!10}{0.26} & \cellcolor{gray!10}{0.35} & \cellcolor{gray!10}{-0.42} & \cellcolor{gray!10}{0.61} & \cellcolor{gray!10}{0.73} & \cellcolor{gray!10}{0.72} & \cellcolor{gray!10}{0.43}\\
+\addlinespace
+ElectricAccess & 0.50 & 0.42 & 0.20 & -0.82 & 0.81 & 0.36 & 0.35 & 0.34\\
+\cellcolor{gray!10}{PopDensity} & \cellcolor{gray!10}{0.18} & \cellcolor{gray!10}{-0.01} & \cellcolor{gray!10}{-0.15} & \cellcolor{gray!10}{-0.07} & \cellcolor{gray!10}{0.13} & \cellcolor{gray!10}{0.26} & \cellcolor{gray!10}{0.29} & \cellcolor{gray!10}{0.37}\\
+PopInSlums & -0.63 & -0.36 & -0.33 & 1.00 & -0.79 & -0.48 & -0.47 & -0.38\\
+\cellcolor{gray!10}{WaterStress} & \cellcolor{gray!10}{0.05} & \cellcolor{gray!10}{-0.02} & \cellcolor{gray!10}{0.06} & \cellcolor{gray!10}{-0.12} & \cellcolor{gray!10}{0.10} & \cellcolor{gray!10}{0.01} & \cellcolor{gray!10}{0.02} & \cellcolor{gray!10}{0.61}\\
+BankingAccess & 0.78 & 0.23 & 0.36 & NA & 0.76 & 0.66 & 0.66 & NA\\
+\addlinespace
+\cellcolor{gray!10}{RnDInvest} & \cellcolor{gray!10}{0.70} & \cellcolor{gray!10}{0.11} & \cellcolor{gray!10}{0.32} & \cellcolor{gray!10}{-0.23} & \cellcolor{gray!10}{0.54} & \cellcolor{gray!10}{0.71} & \cellcolor{gray!10}{0.69} & \cellcolor{gray!10}{0.21}\\
+GovtEffectiveness & 0.94 & 0.28 & 0.27 & -0.57 & 0.70 & 0.72 & 0.71 & 0.43\\
+\cellcolor{gray!10}{ShippingIndex} & \cellcolor{gray!10}{0.39} & \cellcolor{gray!10}{0.16} & \cellcolor{gray!10}{-0.02} & \cellcolor{gray!10}{-0.27} & \cellcolor{gray!10}{0.46} & \cellcolor{gray!10}{0.43} & \cellcolor{gray!10}{0.39} & \cellcolor{gray!10}{0.17}\\
+FixedIntSubs & 0.65 & 0.32 & 0.12 & -0.56 & 0.73 & 0.75 & 0.74 & 0.35\\
+\cellcolor{gray!10}{InternetUsersPct} & \cellcolor{gray!10}{0.57} & \cellcolor{gray!10}{0.38} & \cellcolor{gray!10}{0.17} & \cellcolor{gray!10}{-0.76} & \cellcolor{gray!10}{0.82} & \cellcolor{gray!10}{0.64} & \cellcolor{gray!10}{0.63} & \cellcolor{gray!10}{0.37}\\
+\addlinespace
+PoliticalStability & 0.78 & 0.20 & 0.33 & -0.45 & 0.51 & 0.46 & 0.46 & 0.36\\
+\cellcolor{gray!10}{RuleOfLaw} & \cellcolor{gray!10}{1.00} & \cellcolor{gray!10}{0.26} & \cellcolor{gray!10}{0.29} & \cellcolor{gray!10}{-0.47} & \cellcolor{gray!10}{0.62} & \cellcolor{gray!10}{0.71} & \cellcolor{gray!10}{0.70} & \cellcolor{gray!10}{0.42}\\
+RqdEduYears & 0.26 & 1.00 & 0.16 & -0.35 & 0.45 & 0.28 & 0.26 & 0.11\\
+\cellcolor{gray!10}{GovtEduSpendPctGDP} & \cellcolor{gray!10}{0.29} & \cellcolor{gray!10}{0.16} & \cellcolor{gray!10}{1.00} & \cellcolor{gray!10}{-0.13} & \cellcolor{gray!10}{0.25} & \cellcolor{gray!10}{0.20} & \cellcolor{gray!10}{0.21} & \cellcolor{gray!10}{-0.01}\\
+MortalityFromDirtyness & -0.47 & -0.35 & -0.13 & 1.00 & -0.80 & -0.35 & -0.34 & NA\\
+\addlinespace
+\cellcolor{gray!10}{UHCServiceCoverage} & \cellcolor{gray!10}{0.62} & \cellcolor{gray!10}{0.45} & \cellcolor{gray!10}{0.25} & \cellcolor{gray!10}{-0.80} & \cellcolor{gray!10}{1.00} & \cellcolor{gray!10}{0.58} & \cellcolor{gray!10}{0.56} & \cellcolor{gray!10}{0.35}\\
+HealthSpendPerCapita & 0.71 & 0.28 & 0.20 & -0.35 & 0.58 & 1.00 & 0.97 & 0.38\\
+\cellcolor{gray!10}{GovtHealthSpendPerCapita} & \cellcolor{gray!10}{0.70} & \cellcolor{gray!10}{0.26} & \cellcolor{gray!10}{0.21} & \cellcolor{gray!10}{-0.34} & \cellcolor{gray!10}{0.56} & \cellcolor{gray!10}{0.97} & \cellcolor{gray!10}{1.00} & \cellcolor{gray!10}{0.37}\\
+MigrantsPct & 0.42 & 0.11 & -0.01 & NA & 0.35 & 0.38 & 0.37 & 1.00\\
+\cellcolor{gray!10}{FoodInsecurityPct} & \cellcolor{gray!10}{-0.68} & \cellcolor{gray!10}{-0.30} & \cellcolor{gray!10}{-0.22} & \cellcolor{gray!10}{0.70} & \cellcolor{gray!10}{-0.79} & \cellcolor{gray!10}{-0.52} & \cellcolor{gray!10}{-0.53} & \cellcolor{gray!10}{-0.39}\\
+\addlinespace
+RuralPopulGrowth & -0.31 & -0.12 & -0.08 & 0.49 & -0.46 & -0.10 & -0.11 & -0.05\\
+\cellcolor{gray!10}{VoiceAccountability} & \cellcolor{gray!10}{0.82} & \cellcolor{gray!10}{0.32} & \cellcolor{gray!10}{0.31} & \cellcolor{gray!10}{-0.34} & \cellcolor{gray!10}{0.50} & \cellcolor{gray!10}{0.57} & \cellcolor{gray!10}{0.56} & \cellcolor{gray!10}{0.17}\\
+Homicides & -0.31 & 0.09 & -0.04 & 0.11 & -0.07 & -0.24 & -0.26 & -0.21\\
+\bottomrule
+\end{tabular}}
+\end{table}\begin{table}
+\centering
+\caption{\label{tab:Correlation}Correlation Matrix: Columns 25 to 28}
+\centering
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
+\begin{tabular}[t]{lrrrr}
+\toprule
+  & FoodInsecurityPct & RuralPopulGrowth & VoiceAccountability & Homicides\\
+\midrule
+\cellcolor{gray!10}{HDI\_Index} & \cellcolor{gray!10}{-0.83} & \cellcolor{gray!10}{-0.24} & \cellcolor{gray!10}{0.59} & \cellcolor{gray!10}{-0.24}\\
+IHDI\_Index & -0.85 & -0.52 & 0.65 & -0.30\\
+\cellcolor{gray!10}{GiniCoeff} & \cellcolor{gray!10}{0.84} & \cellcolor{gray!10}{0.50} & \cellcolor{gray!10}{-0.58} & \cellcolor{gray!10}{0.26}\\
+FoodIndex & 0.14 & -0.02 & 0.10 & -0.01\\
+\cellcolor{gray!10}{CorruptionScore} & \cellcolor{gray!10}{-0.62} & \cellcolor{gray!10}{-0.30} & \cellcolor{gray!10}{0.77} & \cellcolor{gray!10}{-0.24}\\
+\addlinespace
+ElectricAccess & -0.78 & -0.23 & 0.40 & -0.06\\
+\cellcolor{gray!10}{PopDensity} & \cellcolor{gray!10}{-0.13} & \cellcolor{gray!10}{-0.03} & \cellcolor{gray!10}{0.08} & \cellcolor{gray!10}{-0.09}\\
+PopInSlums & 0.77 & 0.48 & -0.55 & 0.17\\
+\cellcolor{gray!10}{WaterStress} & \cellcolor{gray!10}{-0.08} & \cellcolor{gray!10}{-0.13} & \cellcolor{gray!10}{-0.14} & \cellcolor{gray!10}{-0.09}\\
+BankingAccess & -0.69 & -0.44 & 0.65 & -0.28\\
+\addlinespace
+\cellcolor{gray!10}{RnDInvest} & \cellcolor{gray!10}{-0.49} & \cellcolor{gray!10}{-0.05} & \cellcolor{gray!10}{0.54} & \cellcolor{gray!10}{-0.31}\\
+GovtEffectiveness & -0.74 & -0.31 & 0.75 & -0.24\\
+\cellcolor{gray!10}{ShippingIndex} & \cellcolor{gray!10}{-0.47} & \cellcolor{gray!10}{-0.24} & \cellcolor{gray!10}{0.13} & \cellcolor{gray!10}{-0.23}\\
+FixedIntSubs & -0.72 & -0.12 & 0.54 & -0.22\\
+\cellcolor{gray!10}{InternetUsersPct} & \cellcolor{gray!10}{-0.77} & \cellcolor{gray!10}{-0.16} & \cellcolor{gray!10}{0.44} & \cellcolor{gray!10}{-0.20}\\
+\addlinespace
+PoliticalStability & -0.51 & -0.31 & 0.68 & -0.18\\
+\cellcolor{gray!10}{RuleOfLaw} & \cellcolor{gray!10}{-0.68} & \cellcolor{gray!10}{-0.31} & \cellcolor{gray!10}{0.82} & \cellcolor{gray!10}{-0.31}\\
+RqdEduYears & -0.30 & -0.12 & 0.32 & 0.09\\
+\cellcolor{gray!10}{GovtEduSpendPctGDP} & \cellcolor{gray!10}{-0.22} & \cellcolor{gray!10}{-0.08} & \cellcolor{gray!10}{0.31} & \cellcolor{gray!10}{-0.04}\\
+MortalityFromDirtyness & 0.70 & 0.49 & -0.34 & 0.11\\
+\addlinespace
+\cellcolor{gray!10}{UHCServiceCoverage} & \cellcolor{gray!10}{-0.79} & \cellcolor{gray!10}{-0.46} & \cellcolor{gray!10}{0.50} & \cellcolor{gray!10}{-0.07}\\
+HealthSpendPerCapita & -0.52 & -0.10 & 0.57 & -0.24\\
+\cellcolor{gray!10}{GovtHealthSpendPerCapita} & \cellcolor{gray!10}{-0.53} & \cellcolor{gray!10}{-0.11} & \cellcolor{gray!10}{0.56} & \cellcolor{gray!10}{-0.26}\\
+MigrantsPct & -0.39 & -0.05 & 0.17 & -0.21\\
+\cellcolor{gray!10}{FoodInsecurityPct} & \cellcolor{gray!10}{1.00} & \cellcolor{gray!10}{0.43} & \cellcolor{gray!10}{-0.54} & \cellcolor{gray!10}{0.39}\\
+\addlinespace
+RuralPopulGrowth & 0.43 & 1.00 & -0.31 & 0.01\\
+\cellcolor{gray!10}{VoiceAccountability} & \cellcolor{gray!10}{-0.54} & \cellcolor{gray!10}{-0.31} & \cellcolor{gray!10}{1.00} & \cellcolor{gray!10}{-0.04}\\
+Homicides & 0.39 & 0.01 & -0.04 & 1.00\\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Step 1: Compute \% missing per variable per year}
+\NormalTok{missing\_heatmap\_data }\OtherTok{\textless{}{-}}\NormalTok{ FirstCutData }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(year) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{everything}\NormalTok{(), }\SpecialCharTok{\textasciitilde{}}\FunctionTok{mean}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(.)) }\SpecialCharTok{*} \DecValTok{100}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_longer}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{year, }\AttributeTok{names\_to =} \StringTok{"variable"}\NormalTok{, }\AttributeTok{values\_to =} \StringTok{"pct\_missing"}\NormalTok{)}
+
+\CommentTok{\# Step 2: Plot with stoplight colors}
+\NormalTok{stoplight }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"\#1a9641"}\NormalTok{, }\StringTok{"\#ffea00"}\NormalTok{, }\StringTok{"\#d7191c"}\NormalTok{)}
+\FunctionTok{print}\NormalTok{(}\FunctionTok{ggplot}\NormalTok{(missing\_heatmap\_data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ year, }\AttributeTok{y =}\NormalTok{ variable, }\AttributeTok{fill =}\NormalTok{ pct\_missing)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_tile}\NormalTok{(}\AttributeTok{color =} \StringTok{"white"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_gradientn}\NormalTok{(}
+    \AttributeTok{colours =}\NormalTok{ stoplight,}
+    \AttributeTok{values =}\NormalTok{ scales}\SpecialCharTok{::}\FunctionTok{rescale}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{25}\NormalTok{, }\DecValTok{100}\NormalTok{)),}
+    \AttributeTok{limits =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{100}\NormalTok{),}
+    \AttributeTok{name =} \StringTok{"\% Missing"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"Missing Data Heatmap"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"Year"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"Variable"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{11}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}
+    \AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle =} \DecValTok{45}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{),}
+    \AttributeTok{panel.grid =} \FunctionTok{element\_blank}\NormalTok{()}
+\NormalTok{  ))}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/MissingnessGrid-1.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{FirstCutData }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{everything}\NormalTok{(), }\SpecialCharTok{\textasciitilde{}} \FunctionTok{mean}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(.)) }\SpecialCharTok{*} \DecValTok{100}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_longer}\NormalTok{(}\AttributeTok{cols =} \FunctionTok{everything}\NormalTok{(), }\AttributeTok{names\_to =} \StringTok{"Variable"}\NormalTok{, }\AttributeTok{values\_to =} \StringTok{"MissingPct"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \FunctionTok{reorder}\NormalTok{(Variable, MissingPct), }\AttributeTok{y =}\NormalTok{ MissingPct, }\AttributeTok{fill =}\NormalTok{ MissingPct)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_col}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{coord\_flip}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_gradientn}\NormalTok{(}
+    \AttributeTok{colors =}\NormalTok{ stoplight,}
+    \AttributeTok{limits =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{100}\NormalTok{),}
+    \AttributeTok{breaks =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{25}\NormalTok{, }\DecValTok{50}\NormalTok{, }\DecValTok{75}\NormalTok{, }\DecValTok{100}\NormalTok{),  }\CommentTok{\# include 0 and 100}
+    \AttributeTok{labels =} \FunctionTok{c}\NormalTok{(}\StringTok{"0"}\NormalTok{, }\StringTok{"25"}\NormalTok{, }\StringTok{"50"}\NormalTok{, }\StringTok{"75"}\NormalTok{, }\StringTok{"100"}\NormalTok{),}
+    \AttributeTok{name =} \StringTok{"\% Missing"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"Overall Sparseness by Variable"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"Variable"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"\% Missing"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/MissingnessSummary-1.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{FirstCutData }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(year) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\FunctionTok{everything}\NormalTok{(), }\SpecialCharTok{\textasciitilde{}} \FunctionTok{mean}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(.)) }\SpecialCharTok{*} \DecValTok{100}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_longer}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{year, }\AttributeTok{names\_to =} \StringTok{"variable"}\NormalTok{, }\AttributeTok{values\_to =} \StringTok{"pct\_missing"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(year) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}\AttributeTok{pct\_missing =} \FunctionTok{mean}\NormalTok{(pct\_missing)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(year) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{y =} \FunctionTok{factor}\NormalTok{(year), }\AttributeTok{x =}\NormalTok{ pct\_missing, }\AttributeTok{fill =}\NormalTok{ pct\_missing)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_col}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_gradientn}\NormalTok{(}
+    \AttributeTok{colors =}\NormalTok{ stoplight,}
+    \AttributeTok{values =} \FunctionTok{rescale}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{50}\NormalTok{, }\DecValTok{100}\NormalTok{)),}
+    \AttributeTok{name =} \StringTok{"\% Missing"}\NormalTok{,}
+    \AttributeTok{limits =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{100}\NormalTok{),}
+    \AttributeTok{breaks =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{50}\NormalTok{, }\DecValTok{100}\NormalTok{),}
+    \AttributeTok{labels =} \FunctionTok{c}\NormalTok{(}\StringTok{"0"}\NormalTok{, }\StringTok{"50"}\NormalTok{, }\StringTok{"100"}\NormalTok{)}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{y =} \StringTok{"Year"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"\% Missing (All Variables)"}\NormalTok{,}
+    \AttributeTok{title =} \StringTok{"Data Sparseness by Year"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}
+    \AttributeTok{axis.text.y =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{8}\NormalTok{),}
+    \AttributeTok{legend.position =} \StringTok{"right"}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/MissingnessSummary-2.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Time series analysis}
+
+\CommentTok{\# Overall averages}
+
+
+
+
+
+\CommentTok{\# Prep data}
+\NormalTok{FirstCut\_Yearly\_Avg }\OtherTok{\textless{}{-}}\NormalTok{ FirstCutData }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(year) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarize}\NormalTok{(}
+    \AttributeTok{InternetUsers =} \FunctionTok{mean}\NormalTok{(InternetUsersPct, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}\SpecialCharTok{/}\DecValTok{100}\NormalTok{,}
+    \AttributeTok{HDI =} \FunctionTok{mean}\NormalTok{(HDI\_Index, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \AttributeTok{.groups =} \StringTok{"drop"}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{HDI\_scaled =}\NormalTok{ (HDI }\SpecialCharTok{{-}} \FloatTok{0.6}\NormalTok{) }\SpecialCharTok{/} \FloatTok{0.4}  \CommentTok{\# rescale onto same scale as inernet users}
+\NormalTok{  )}
+
+\CommentTok{\# Plot with dual axes}
+\FunctionTok{ggplot}\NormalTok{(FirstCut\_Yearly\_Avg, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ year)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_line}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{y =}\NormalTok{ InternetUsers, }\AttributeTok{color =} \StringTok{"Internet Users (\%)"}\NormalTok{), }\AttributeTok{size =} \FloatTok{1.2}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_line}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{y =}\NormalTok{ HDI\_scaled, }\AttributeTok{color =} \StringTok{"HDI"}\NormalTok{), }\AttributeTok{size =} \FloatTok{1.2}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_x\_continuous}\NormalTok{(}\AttributeTok{breaks =} \FunctionTok{seq}\NormalTok{(}\DecValTok{1995}\NormalTok{, }\DecValTok{2025}\NormalTok{, }\AttributeTok{by =} \DecValTok{2}\NormalTok{))}\SpecialCharTok{+}
+  \FunctionTok{scale\_y\_continuous}\NormalTok{(}
+    \AttributeTok{name =} \StringTok{"Internet Users (\%)"}\NormalTok{,}
+    \AttributeTok{labels =}\NormalTok{ scales}\SpecialCharTok{::}\NormalTok{percent,}
+    \AttributeTok{limits =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\FloatTok{0.75}\NormalTok{),  }\CommentTok{\# force axis to run from 0\% to 75\%}
+    \AttributeTok{sec.axis =} \FunctionTok{sec\_axis}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{ . }\SpecialCharTok{*} \FloatTok{0.4} \SpecialCharTok{+} \FloatTok{0.6}\NormalTok{, }\AttributeTok{name =} \StringTok{"HDI"}\NormalTok{) }\CommentTok{\# label axis correctly }
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{scale\_color\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"Internet Users (\%)"} \OtherTok{=} \StringTok{"\#00BFC4"}\NormalTok{, }\StringTok{"HDI"} \OtherTok{=} \StringTok{"\#F8766D"}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"Global Average Internet Use and HDI Over Time"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"Year"}\NormalTok{,}
+    \AttributeTok{color =} \StringTok{""}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{14}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}
+    \AttributeTok{legend.position =} \StringTok{"bottom"}\NormalTok{,}
+    \AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{hjust =} \FloatTok{0.5}\NormalTok{)}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+## i Please use `linewidth` instead.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/TimeSeries-1.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Group and summarize}
+\NormalTok{FirstCut\_Yearly\_Income\_Avg }\OtherTok{\textless{}{-}}\NormalTok{ FirstCutDataFiltered }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(year, }\StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarize}\NormalTok{(}
+    \StringTok{\textasciigrave{}}\AttributeTok{Internet Users (\%)}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{mean}\NormalTok{(InternetUsersPct, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}\SpecialCharTok{/}\DecValTok{100}\NormalTok{,}
+    \StringTok{\textasciigrave{}}\AttributeTok{HDI}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{mean}\NormalTok{(HDI\_Index, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \AttributeTok{.groups =} \StringTok{"drop"}
+\NormalTok{  )}
+
+\CommentTok{\# Pivot to long format}
+\NormalTok{FirstCut\_Yearly\_Income\_Avg\_Long }\OtherTok{\textless{}{-}}\NormalTok{ FirstCut\_Yearly\_Income\_Avg }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_longer}\NormalTok{(}\AttributeTok{cols =} \FunctionTok{c}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{Internet Users (\%)}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{HDI}\StringTok{\textasciigrave{}}\NormalTok{),}
+               \AttributeTok{names\_to =} \StringTok{"Metric"}\NormalTok{, }\AttributeTok{values\_to =} \StringTok{"Value"}\NormalTok{)}
+
+\CommentTok{\# Plot {-} facet by Income Group (columns) and Metric (rows), color by Metric}
+\FunctionTok{ggplot}\NormalTok{(FirstCut\_Yearly\_Income\_Avg\_Long,}
+       \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ year, }\AttributeTok{y =}\NormalTok{ Value, }\AttributeTok{color =}\NormalTok{ Metric)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_line}\NormalTok{(}\AttributeTok{size =} \FloatTok{1.2}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{facet\_grid}\NormalTok{(Metric }\SpecialCharTok{\textasciitilde{}} \StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}}\NormalTok{, }\AttributeTok{scales =} \StringTok{"free\_y"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_color\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"HDI"} \OtherTok{=} \StringTok{"\#F8766D"}\NormalTok{,}
+    \StringTok{"Internet Users (\%)"} \OtherTok{=} \StringTok{"\#00BFC4"}
+\NormalTok{  )) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"Internet Access and HDI Over Time by Income Group"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"Year"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"Average Value"}\NormalTok{,}
+    \AttributeTok{color =} \StringTok{""}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{14}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}
+    \AttributeTok{legend.position =} \StringTok{"bottom"}\NormalTok{,}
+    \AttributeTok{strip.text =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{size =} \DecValTok{12}\NormalTok{),}
+    \AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{hjust =} \FloatTok{0.5}\NormalTok{),}
+    \AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{9}\NormalTok{, }\AttributeTok{angle =} \DecValTok{45}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{)  }\CommentTok{\# 👈 the fix}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/TimeSeries-2.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Filter to Low Income only}
+\NormalTok{LowIncome\_Yearly\_Avg }\OtherTok{\textless{}{-}}\NormalTok{ FirstCutDataFiltered }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}} \SpecialCharTok{==} \StringTok{"Low income"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(year) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarize}\NormalTok{(}
+    \StringTok{\textasciigrave{}}\AttributeTok{Internet Users (\%)}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{mean}\NormalTok{(InternetUsersPct, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}\SpecialCharTok{/}\DecValTok{100}\NormalTok{,}
+    \StringTok{\textasciigrave{}}\AttributeTok{HDI}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{mean}\NormalTok{(HDI\_Index, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \AttributeTok{.groups =} \StringTok{"drop"}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_longer}\NormalTok{(}\AttributeTok{cols =} \FunctionTok{c}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{Internet Users (\%)}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{HDI}\StringTok{\textasciigrave{}}\NormalTok{),}
+               \AttributeTok{names\_to =} \StringTok{"Metric"}\NormalTok{, }\AttributeTok{values\_to =} \StringTok{"Value"}\NormalTok{)}
+
+\CommentTok{\# Plot with HDI and Internet Users (\%) stacked vertically}
+\FunctionTok{ggplot}\NormalTok{(LowIncome\_Yearly\_Avg, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ year, }\AttributeTok{y =}\NormalTok{ Value, }\AttributeTok{color =}\NormalTok{ Metric)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_line}\NormalTok{(}\AttributeTok{size =} \FloatTok{1.2}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{ Metric, }\AttributeTok{ncol =} \DecValTok{1}\NormalTok{, }\AttributeTok{scales =} \StringTok{"free\_y"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_color\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"HDI"} \OtherTok{=} \StringTok{"\#F8766D"}\NormalTok{,}
+    \StringTok{"Internet Users (\%)"} \OtherTok{=} \StringTok{"\#00BFC4"}
+\NormalTok{  )) }\SpecialCharTok{+}
+  \FunctionTok{scale\_x\_continuous}\NormalTok{(}\AttributeTok{breaks =} \FunctionTok{seq}\NormalTok{(}\DecValTok{1995}\NormalTok{, }\DecValTok{2025}\NormalTok{, }\DecValTok{2}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"Time Trends of Internet Access and HDI (Low Income Countries)"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"Year"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"Average Value"}\NormalTok{,}
+    \AttributeTok{color =} \StringTok{""}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{14}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}
+    \AttributeTok{legend.position =} \StringTok{"bottom"}\NormalTok{,}
+    \AttributeTok{strip.text =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{size =} \DecValTok{12}\NormalTok{),}
+    \AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{hjust =} \FloatTok{0.5}\NormalTok{),}
+    \AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{9}\NormalTok{, }\AttributeTok{angle =} \DecValTok{45}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{)}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/TimeSeries-3.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Create groupings}
+\NormalTok{LowIncome\_Yearly\_Avg }\OtherTok{\textless{}{-}}\NormalTok{ FirstCutDataFiltered }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}} \SpecialCharTok{==} \StringTok{"Low income"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(year) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarize}\NormalTok{(}
+    \StringTok{\textasciigrave{}}\AttributeTok{Internet Users (\%)}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{mean}\NormalTok{(InternetUsersPct, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}\SpecialCharTok{/}\DecValTok{100}\NormalTok{,}
+    \StringTok{\textasciigrave{}}\AttributeTok{HDI}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{mean}\NormalTok{(HDI\_Index, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \StringTok{\textasciigrave{}}\AttributeTok{IHDI}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{mean}\NormalTok{(IHDI\_Index, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+    \AttributeTok{.groups =} \StringTok{"drop"}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_longer}\NormalTok{(}\AttributeTok{cols =} \FunctionTok{c}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{Internet Users (\%)}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{HDI}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{IHDI}\StringTok{\textasciigrave{}}\NormalTok{),}
+               \AttributeTok{names\_to =} \StringTok{"Metric"}\NormalTok{, }\AttributeTok{values\_to =} \StringTok{"Value"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{MetricGroup =} \FunctionTok{ifelse}\NormalTok{(Metric }\SpecialCharTok{\%in\%} \FunctionTok{c}\NormalTok{(}\StringTok{"HDI"}\NormalTok{, }\StringTok{"IHDI"}\NormalTok{),}
+                         \StringTok{"Wellbeing Index"}\NormalTok{,}
+                         \StringTok{"Internet Access"}\NormalTok{)}
+\NormalTok{  )}
+
+\CommentTok{\# Reorder facet levels so Wellbeing is on top}
+\NormalTok{LowIncome\_Yearly\_Avg}\SpecialCharTok{$}\NormalTok{MetricGroup }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  LowIncome\_Yearly\_Avg}\SpecialCharTok{$}\NormalTok{MetricGroup,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Wellbeing Index"}\NormalTok{, }\StringTok{"Internet Access"}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{\# Plot}
+\FunctionTok{ggplot}\NormalTok{(LowIncome\_Yearly\_Avg, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ year, }\AttributeTok{y =}\NormalTok{ Value, }\AttributeTok{color =}\NormalTok{ Metric)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_line}\NormalTok{(}\AttributeTok{size =} \FloatTok{1.2}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{ MetricGroup, }\AttributeTok{ncol =} \DecValTok{1}\NormalTok{, }\AttributeTok{scales =} \StringTok{"free\_y"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_color\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"HDI"} \OtherTok{=} \StringTok{"\#F8766D"}\NormalTok{,}
+    \StringTok{"IHDI"} \OtherTok{=} \StringTok{"\#D89000"}\NormalTok{,}
+    \StringTok{"Internet Users (\%)"} \OtherTok{=} \StringTok{"\#00BFC4"}
+\NormalTok{  )) }\SpecialCharTok{+}
+  \FunctionTok{scale\_x\_continuous}\NormalTok{(}\AttributeTok{breaks =} \FunctionTok{seq}\NormalTok{(}\DecValTok{1995}\NormalTok{, }\DecValTok{2025}\NormalTok{, }\DecValTok{2}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"HDI, IHDI, and Internet Access Over Time (Low Income Countries)"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"Year"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"Average Value"}\NormalTok{,}
+    \AttributeTok{color =} \StringTok{""}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{14}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}
+    \AttributeTok{legend.position =} \StringTok{"bottom"}\NormalTok{,}
+    \AttributeTok{strip.text =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{size =} \DecValTok{12}\NormalTok{),}
+    \AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{face =} \StringTok{"bold"}\NormalTok{, }\AttributeTok{hjust =} \FloatTok{0.5}\NormalTok{),}
+    \AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{9}\NormalTok{, }\AttributeTok{angle =} \DecValTok{45}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{)}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: Removed 15 rows containing missing values or values outside the scale range
+## (`geom_line()`).
+\end{verbatim}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/TimeSeries-4.pdf}}
+
 \end{document}

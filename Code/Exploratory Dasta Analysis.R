@@ -1,4 +1,23 @@
+---
+  title: "Exploratory Data Analysys"
+author: "Barrett Viator and Ray Chandonnet"
+date: "2025-07-26"
+output: 
+  pdf_document:
+  latex_engine: xelatex
+number_sections: true
+keep_tex: true
+extra_dependencies: ["lscape"]
+pandoc_args: ["--variable", "geometry:landscape", "--variable", "geometry:margin=0.75in"]
+header-includes:
+  - \usepackage{xcolor}
+---
+  
+  
+  \textcolor{blue}{This code uses static data as its starting point rather than running a lengthy API call.  For production, to access realtime current data, this would be replaced by a call to the API using the reticulate functions that call Python code in R}
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 # Load libraries as needed
 library(tidyverse)
 library(ggplot2)
@@ -15,16 +34,18 @@ library(corrplot)
 library(naniar)
 library(reshape2)
 library(scales)
+```
 
+```{r ImportData}
 RawData <- readRDS(here::here("Data","PreEDA_DataFrame.rds"))
 names(RawData) <- make.unique(names(RawData), sep = ".")
 FieldActions <- read_excel(here::here("Data", "FieldActions.xlsx"))
 CleanedData <- RawData # make a copy to preserve original
 IncomeData <- read_excel(here::here("Data", "Income Group Data.xlsx")) # Import income data
+```
 
 
-
-
+```{r CleanAndExtract}
 # This code iterates through every field in the raw data, taking the cleanup action on
 # it that is specified in the FieldActions data frame.  The net result is that a bunch of
 # duplicated and/or unneeded fields are deleted, fields with uninterpretable (coded) column 
@@ -66,9 +87,9 @@ PrimaryFields <- c(PrimaryFields, "Income Group")
 FirstCutData <- CleanedData %>%
   select(all_of(PrimaryFields))
 write_xlsx(FirstCutData, path = here::here("Data","FirstCutData.xlsx"))
+```
 
-
-
+```{r SummaryData, results='asis', echo=FALSE}
 
 SummaryData <- summary(FirstCutData)
 
@@ -95,8 +116,14 @@ for (i in seq(1, cols, by = cols_per_table)) {
   )
 }
 
+```
+```{r SkimData, echo=FALSE}
 skim(FirstCutData)
+```
 
+
+
+```{r ScatterPlots}
 # Filter complete cases again (just in case)
 ggplot(FirstCutData, aes(x = InternetUsersPct, y = HDI_Index)) +
   geom_point(alpha = 0.7, color = "steelblue") +
@@ -148,7 +175,9 @@ ggplot(FirstCutDataFiltered, aes(x = InternetUsersPct, y = HDI_Index, color = `I
     color = "Income Group"
   ) +
   theme_minimal()
+```
 
+```{r InternetDistributionPlots}
 FirstCutDataFiltered <- FirstCutData[!is.na(FirstCutData$`Income Group`), ]
 
 FirstCutDataFiltered$`Income Group` <- factor(
@@ -224,7 +253,9 @@ ggplot(zoom_summary, aes(x = Bin, y = Percent, fill = `Income Group`)) +
     axis.text.x = element_text(angle = 0, hjust = 0.5),
     legend.position = "none"
   ) 
+```
 
+```{r ViolinPlots}
 ggplot(FirstCutDataFiltered, aes(x = `Income Group`, y = HDI_Index, fill = `Income Group`)) +
   geom_violin(trim = FALSE, alpha = 0.7) +
   geom_jitter(width = 0.15, alpha = 0.3, color = "black", size = 1) +
@@ -240,8 +271,6 @@ ggplot(FirstCutDataFiltered, aes(x = `Income Group`, y = HDI_Index, fill = `Inco
     axis.title.x = element_text(face = "bold"),
     axis.title.y = element_text(face = "bold")
   )
-Sys.sleep(2)
-message("Printed first violin plot")
 
 ggplot(FirstCutDataFiltered, aes(x = `Income Group`, y = InternetUsersPct, fill = `Income Group`)) +
   geom_violin(trim = TRUE, color = "black", adjust = 1.2) +  # trim removes tails beyond the data
@@ -265,9 +294,9 @@ ggplot(FirstCutDataFiltered, aes(x = `Income Group`, y = InternetUsersPct, fill 
     "Upper middle income" = "#00BFC4",
     "High income" = "#C77CFF"
   ))
-Sys.sleep(2)
-message("Printed second violin plot")
+```
 
+```{r Correlation, results='asis'}
 # Step 1: Select only numeric columns and drop unwanted ones
 numeric_vars <- FirstCutData %>%
   select(where(is.numeric)) %>%
@@ -336,11 +365,13 @@ for (i in seq(1, cols, by = cols_per_table)) {
     )
   )
 }
+```
 
+```{r MissingnessGrid}
 # Step 1: Compute % missing per variable per year
 missing_heatmap_data <- FirstCutData %>%
   group_by(year) %>%
-  summarize(across(everything(), ~mean(is.na(.)) * 100)) %>%
+  summarise(across(everything(), ~mean(is.na(.)) * 100)) %>%
   pivot_longer(-year, names_to = "variable", values_to = "pct_missing")
 
 # Step 2: Plot with stoplight colors
@@ -348,7 +379,7 @@ stoplight <- c("#1a9641", "#ffea00", "#d7191c")
 print(ggplot(missing_heatmap_data, aes(x = year, y = variable, fill = pct_missing)) +
         geom_tile(color = "white") +
         scale_fill_gradientn(
-          colors = stoplight,
+          colours = stoplight,
           values = scales::rescale(c(0, 25, 100)),
           limits = c(0, 100),
           name = "% Missing"
@@ -363,9 +394,10 @@ print(ggplot(missing_heatmap_data, aes(x = year, y = variable, fill = pct_missin
           axis.text.x = element_text(angle = 45, hjust = 1),
           panel.grid = element_blank()
         ))
-
+```
+```{r MissingnessSummary}
 FirstCutData %>%
-  summarize(across(everything(), ~ mean(is.na(.)) * 100)) %>%
+  summarise(across(everything(), ~ mean(is.na(.)) * 100)) %>%
   pivot_longer(cols = everything(), names_to = "Variable", values_to = "MissingPct") %>%
   ggplot(aes(x = reorder(Variable, MissingPct), y = MissingPct, fill = MissingPct)) +
   geom_col() +
@@ -386,10 +418,10 @@ FirstCutData %>%
 
 FirstCutData %>%
   group_by(year) %>%
-  summarize(across(everything(), ~ mean(is.na(.)) * 100)) %>%
+  summarise(across(everything(), ~ mean(is.na(.)) * 100)) %>%
   pivot_longer(-year, names_to = "variable", values_to = "pct_missing") %>%
   group_by(year) %>%
-  summarize(pct_missing = mean(pct_missing)) %>%
+  summarise(pct_missing = mean(pct_missing)) %>%
   arrange(year) %>%
   ggplot(aes(y = factor(year), x = pct_missing, fill = pct_missing)) +
   geom_col() +
@@ -411,4 +443,4 @@ FirstCutData %>%
     axis.text.y = element_text(size = 8),
     legend.position = "right"
   )
-
+```
