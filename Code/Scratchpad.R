@@ -1,0 +1,166 @@
+# Time series analysis
+
+# Overall averages
+
+
+
+
+
+# Prep data
+FirstCut_Yearly_Avg <- FirstCutData %>%
+  group_by(year) %>%
+  summarize(
+    InternetUsers = mean(InternetUsersPct, na.rm = TRUE)/100,
+    HDI = mean(HDI_Index, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    HDI_scaled = (HDI - 0.6) / 0.4  # rescale onto same scale as inernet users
+  )
+
+# Plot with dual axes
+ggplot(FirstCut_Yearly_Avg, aes(x = year)) +
+  geom_line(aes(y = InternetUsers, color = "Internet Users (%)"), size = 1.2) +
+  geom_line(aes(y = HDI_scaled, color = "HDI"), size = 1.2) +
+  scale_x_continuous(breaks = seq(1995, 2025, by = 2))+
+  scale_y_continuous(
+    name = "Internet Users (%)",
+    labels = scales::percent,
+    limits = c(0, 0.75),  # force axis to run from 0% to 75%
+    sec.axis = sec_axis(~ . * 0.4 + 0.6, name = "HDI") # label axis correctly 
+  ) +
+  scale_color_manual(values = c("Internet Users (%)" = "#00BFC4", "HDI" = "#F8766D")) +
+  labs(
+    title = "Global Average Internet Use and HDI Over Time",
+    x = "Year",
+    color = ""
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = "bottom",
+    plot.title = element_text(face = "bold", hjust = 0.5)
+  )
+
+
+# Group and summarize
+FirstCut_Yearly_Income_Avg <- FirstCutDataFiltered %>%
+  group_by(year, `Income Group`) %>%
+  summarize(
+    `Internet Users (%)` = mean(InternetUsersPct, na.rm = TRUE)/100,
+    `HDI` = mean(HDI_Index, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# Pivot to long format
+FirstCut_Yearly_Income_Avg_Long <- FirstCut_Yearly_Income_Avg %>%
+  pivot_longer(cols = c(`Internet Users (%)`, `HDI`),
+               names_to = "Metric", values_to = "Value")
+
+# Plot - facet by Income Group (columns) and Metric (rows), color by Metric
+ggplot(FirstCut_Yearly_Income_Avg_Long,
+       aes(x = year, y = Value, color = Metric)) +
+  geom_line(size = 1.2) +
+  facet_grid(Metric ~ `Income Group`, scales = "free_y") +
+  scale_color_manual(values = c(
+    "HDI" = "#F8766D",
+    "Internet Users (%)" = "#00BFC4"
+  )) +
+  labs(
+    title = "Internet Access and HDI Over Time by Income Group",
+    x = "Year",
+    y = "Average Value",
+    color = ""
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = "bottom",
+    strip.text = element_text(face = "bold", size = 12),
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    axis.text.x = element_text(size = 9, angle = 45, hjust = 1)  # 👈 the fix
+  )
+
+# Filter to Low Income only
+LowIncome_Yearly_Avg <- FirstCutDataFiltered %>%
+  filter(`Income Group` == "Low income") %>%
+  group_by(year) %>%
+  summarize(
+    `Internet Users (%)` = mean(InternetUsersPct, na.rm = TRUE)/100,
+    `HDI` = mean(HDI_Index, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  pivot_longer(cols = c(`Internet Users (%)`, `HDI`),
+               names_to = "Metric", values_to = "Value")
+
+# Plot with HDI and Internet Users (%) stacked vertically
+ggplot(LowIncome_Yearly_Avg, aes(x = year, y = Value, color = Metric)) +
+  geom_line(size = 1.2) +
+  facet_wrap(~ Metric, ncol = 1, scales = "free_y") +
+  scale_color_manual(values = c(
+    "HDI" = "#F8766D",
+    "Internet Users (%)" = "#00BFC4"
+  )) +
+  scale_x_continuous(breaks = seq(1995, 2025, 2)) +
+  labs(
+    title = "Time Trends of Internet Access and HDI (Low Income Countries)",
+    x = "Year",
+    y = "Average Value",
+    color = ""
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = "bottom",
+    strip.text = element_text(face = "bold", size = 12),
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    axis.text.x = element_text(size = 9, angle = 45, hjust = 1)
+  )
+
+                              
+# Create groupings
+LowIncome_Yearly_Avg <- FirstCutDataFiltered %>%
+  filter(`Income Group` == "Low income") %>%
+  group_by(year) %>%
+  summarize(
+    `Internet Users (%)` = mean(InternetUsersPct, na.rm = TRUE)/100,
+    `HDI` = mean(HDI_Index, na.rm = TRUE),
+    `IHDI` = mean(IHDI_Index, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  pivot_longer(cols = c(`Internet Users (%)`, `HDI`, `IHDI`),
+               names_to = "Metric", values_to = "Value") %>%
+  mutate(
+    MetricGroup = ifelse(Metric %in% c("HDI", "IHDI"),
+                         "Wellbeing Index",
+                         "Internet Access")
+  )
+
+# Reorder facet levels so Wellbeing is on top
+LowIncome_Yearly_Avg$MetricGroup <- factor(
+  LowIncome_Yearly_Avg$MetricGroup,
+  levels = c("Wellbeing Index", "Internet Access")
+)
+
+# Plot
+ggplot(LowIncome_Yearly_Avg, aes(x = year, y = Value, color = Metric)) +
+  geom_line(size = 1.2) +
+  facet_wrap(~ MetricGroup, ncol = 1, scales = "free_y") +
+  scale_color_manual(values = c(
+    "HDI" = "#F8766D",
+    "IHDI" = "#D89000",
+    "Internet Users (%)" = "#00BFC4"
+  )) +
+  scale_x_continuous(breaks = seq(1995, 2025, 2)) +
+  labs(
+    title = "HDI, IHDI, and Internet Access Over Time (Low Income Countries)",
+    x = "Year",
+    y = "Average Value",
+    color = ""
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    legend.position = "bottom",
+    strip.text = element_text(face = "bold", size = 12),
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    axis.text.x = element_text(size = 9, angle = 45, hjust = 1)
+  )
+
+

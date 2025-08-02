@@ -126,19 +126,19 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}
 \hypersetup{
-  pdftitle={Exploratory Data Analysys},
+  pdftitle={Preprocessing and Feature Engineering},
   pdfauthor={Barrett Viator and Ray Chandonnet},
   hidelinks,
   pdfcreator={LaTeX via pandoc}}
 
-\title{Exploratory Data Analysys}
+\title{Preprocessing and Feature Engineering}
 \author{Barrett Viator and Ray Chandonnet}
 \date{2025-07-26}
 
 \begin{document}
 \maketitle
 
-\textcolor{blue}{This code uses static data as its starting point rather than running a lengthy API call.  For production, to access realtime current data, this would be replaced by a call to the API using the reticulate functions that call Python code in R}
+\textcolor{blue}{This code uses static data created by the EDA code as its starting point. For final production, all this code probably needs to be stitched together}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -192,7 +192,13 @@
 \CommentTok{\# Subset the cleaned dataset using that list of fields}
 \NormalTok{FirstCutData }\OtherTok{\textless{}{-}}\NormalTok{ CleanedData }\SpecialCharTok{\%\textgreater{}\%}
   \FunctionTok{select}\NormalTok{(}\FunctionTok{all\_of}\NormalTok{(PrimaryFields))}
-\FunctionTok{write\_xlsx}\NormalTok{(FirstCutData, }\AttributeTok{path =}\NormalTok{ here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(}\StringTok{"Data"}\NormalTok{,}\StringTok{"FirstCutData.xlsx"}\NormalTok{))}
+\NormalTok{FirstCutData}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}} \OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
+\NormalTok{  FirstCutData}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}}\NormalTok{,}
+  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Low income"}\NormalTok{, }\StringTok{"Lower middle income"}\NormalTok{, }
+             \StringTok{"Upper middle income"}\NormalTok{, }\StringTok{"High income"}\NormalTok{),}
+  \AttributeTok{ordered =} \ConstantTok{TRUE}
+\NormalTok{)}
+\FunctionTok{saveRDS}\NormalTok{(FirstCutData, }\AttributeTok{file =}\NormalTok{ here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(}\StringTok{"Data"}\NormalTok{,}\StringTok{"FirstCutData.rds"}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
 
@@ -279,13 +285,13 @@
 \resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
 \begin{tabular}[t]{llll}
 \toprule
-  & VoiceAccountability &   Homicides & Income Group\\
+  & VoiceAccountability &   Homicides &              Income Group\\
 \midrule
-\cellcolor{gray!10}{} & \cellcolor{gray!10}{Min.   :-2.31340} & \cellcolor{gray!10}{Min.   :  0.000} & \cellcolor{gray!10}{Length:5974}\\
- & 1st Qu.:-0.88313 & 1st Qu.:  1.228 & Class :character\\
-\cellcolor{gray!10}{} & \cellcolor{gray!10}{Median :-0.00619} & \cellcolor{gray!10}{Median :  2.861} & \cellcolor{gray!10}{Mode  :character}\\
- & Mean   :-0.04756 & Mean   :  7.939 & NA\\
-\cellcolor{gray!10}{} & \cellcolor{gray!10}{3rd Qu.: 0.85004} & \cellcolor{gray!10}{3rd Qu.:  8.879} & \cellcolor{gray!10}{NA}\\
+\cellcolor{gray!10}{} & \cellcolor{gray!10}{Min.   :-2.31340} & \cellcolor{gray!10}{Min.   :  0.000} & \cellcolor{gray!10}{Low income         : 725}\\
+ & 1st Qu.:-0.88313 & 1st Qu.:  1.228 & Lower middle income:1450\\
+\cellcolor{gray!10}{} & \cellcolor{gray!10}{Median :-0.00619} & \cellcolor{gray!10}{Median :  2.861} & \cellcolor{gray!10}{Upper middle income:1537}\\
+ & Mean   :-0.04756 & Mean   :  7.939 & High income        :1885\\
+\cellcolor{gray!10}{} & \cellcolor{gray!10}{3rd Qu.: 0.85004} & \cellcolor{gray!10}{3rd Qu.:  8.879} & \cellcolor{gray!10}{NA's               : 377}\\
 \addlinespace
  & Max.   : 1.80099 & Max.   :138.774 & NA\\
 \cellcolor{gray!10}{} & \cellcolor{gray!10}{NA's   :1112} & \cellcolor{gray!10}{NA's   :2755} & \cellcolor{gray!10}{NA}\\
@@ -305,7 +311,8 @@ Number of rows & 5974 \\
 Number of columns & 35 \\
 \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \\
 Column type frequency: & \\
-character & 3 \\
+character & 2 \\
+factor & 1 \\
 numeric & 32 \\
 \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ & \\
 Group variables & None \\
@@ -346,7 +353,37 @@ whitespace
 \endlastfoot
 CountryCode & 0 & 1.00 & 3 & 9 & 0 & 206 & 0 \\
 CountryName & 319 & 0.95 & 4 & 38 & 0 & 195 & 0 \\
-Income Group & 377 & 0.94 & 10 & 19 & 0 & 4 & 0 \\
+\end{longtable}
+
+\textbf{Variable type: factor}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1443}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1031}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1443}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0825}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0928}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.4330}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+skim\_variable
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+n\_missing
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+complete\_rate
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ordered
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+n\_unique
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+top\_counts
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Income Group & 377 & 0.94 & TRUE & 4 & Hig: 1885, Upp: 1537, Low: 1450,
+Low: 725 \\
 \end{longtable}
 
 \textbf{Variable type: numeric}
@@ -497,15 +534,12 @@ Homicides & 2755 & 0.54 & 7.940000e+00 & 1.247000e+01 & 0.00 & 1.23 &
 ## (`geom_point()`).
 \end{verbatim}
 
-\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/ScatterPlots-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{Preprocessing_files/figure-latex/ScatterPlots-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{FirstCutDataFiltered }\OtherTok{\textless{}{-}}\NormalTok{ FirstCutData[}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(FirstCutData}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}}\NormalTok{), ]}
-\NormalTok{FirstCutDataFiltered}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}} \OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}
-\NormalTok{  FirstCutDataFiltered}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}}\NormalTok{,}
-  \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Low income"}\NormalTok{, }\StringTok{"Lower middle income"}\NormalTok{, }\StringTok{"Upper middle income"}\NormalTok{, }\StringTok{"High income"}\NormalTok{)}
-\NormalTok{)}
+
 \FunctionTok{ggplot}\NormalTok{(FirstCutDataFiltered, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ InternetUsersPct, }\AttributeTok{y =}\NormalTok{ HDI\_Index, }\AttributeTok{color =} \StringTok{\textasciigrave{}}\AttributeTok{Income Group}\StringTok{\textasciigrave{}}\NormalTok{)) }\SpecialCharTok{+}
   \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{) }\SpecialCharTok{+}
   \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{method =} \StringTok{"lm"}\NormalTok{, }\AttributeTok{se =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{+}
@@ -547,7 +581,7 @@ Homicides & 2755 & 0.54 & 7.940000e+00 & 1.247000e+01 & 0.00 & 1.23 &
 ## (`geom_point()`).
 \end{verbatim}
 
-\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/ScatterPlots-2.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{Preprocessing_files/figure-latex/ScatterPlots-2.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -589,7 +623,7 @@ Homicides & 2755 & 0.54 & 7.940000e+00 & 1.247000e+01 & 0.00 & 1.23 &
 \end{Highlighting}
 \end{Shaded}
 
-\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/InternetDistributionPlots-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{Preprocessing_files/figure-latex/InternetDistributionPlots-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -635,7 +669,7 @@ Homicides & 2755 & 0.54 & 7.940000e+00 & 1.247000e+01 & 0.00 & 1.23 &
 \end{Highlighting}
 \end{Shaded}
 
-\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/InternetDistributionPlots-2.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{Preprocessing_files/figure-latex/InternetDistributionPlots-2.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -667,7 +701,7 @@ Homicides & 2755 & 0.54 & 7.940000e+00 & 1.247000e+01 & 0.00 & 1.23 &
 ## (`geom_point()`).
 \end{verbatim}
 
-\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/ViolinPlots-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{Preprocessing_files/figure-latex/ViolinPlots-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -702,11 +736,11 @@ Homicides & 2755 & 0.54 & 7.940000e+00 & 1.247000e+01 & 0.00 & 1.23 &
 \end{verbatim}
 
 \begin{verbatim}
-## Warning: Removed 368 rows containing missing values or values outside the scale range
+## Warning: Removed 373 rows containing missing values or values outside the scale range
 ## (`geom_point()`).
 \end{verbatim}
 
-\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/ViolinPlots-2.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{Preprocessing_files/figure-latex/ViolinPlots-2.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -733,7 +767,7 @@ Homicides & 2755 & 0.54 & 7.940000e+00 & 1.247000e+01 & 0.00 & 1.23 &
 \end{Highlighting}
 \end{Shaded}
 
-\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/Correlation-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{Preprocessing_files/figure-latex/Correlation-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -750,7 +784,7 @@ Homicides & 2755 & 0.54 & 7.940000e+00 & 1.247000e+01 & 0.00 & 1.23 &
 \end{Highlighting}
 \end{Shaded}
 
-\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/Correlation-2.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{Preprocessing_files/figure-latex/Correlation-2.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -766,7 +800,7 @@ Homicides & 2755 & 0.54 & 7.940000e+00 & 1.247000e+01 & 0.00 & 1.23 &
 \end{Highlighting}
 \end{Shaded}
 
-\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/Correlation-3.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{Preprocessing_files/figure-latex/Correlation-3.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1024,7 +1058,7 @@ VoiceAccountability & 0.57 & 0.56 & 0.17 & -0.54 & -0.31 & 1.00 & -0.04\\
 \end{Highlighting}
 \end{Shaded}
 
-\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/MissingnessGrid-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{Preprocessing_files/figure-latex/MissingnessGrid-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1050,7 +1084,7 @@ VoiceAccountability & 0.57 & 0.56 & 0.17 & -0.54 & -0.31 & 1.00 & -0.04\\
 \end{Highlighting}
 \end{Shaded}
 
-\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/MissingnessSummary-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{Preprocessing_files/figure-latex/MissingnessSummary-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1084,7 +1118,7 @@ VoiceAccountability & 0.57 & 0.56 & 0.17 & -0.54 & -0.31 & 1.00 & -0.04\\
 \end{Highlighting}
 \end{Shaded}
 
-\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/MissingnessSummary-2.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{Preprocessing_files/figure-latex/MissingnessSummary-2.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1141,7 +1175,7 @@ VoiceAccountability & 0.57 & 0.56 & 0.17 & -0.54 & -0.31 & 1.00 & -0.04\\
 ## generated.
 \end{verbatim}
 
-\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/TimeSeries-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{Preprocessing_files/figure-latex/TimeSeries-1.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1184,7 +1218,7 @@ VoiceAccountability & 0.57 & 0.56 & 0.17 & -0.54 & -0.31 & 1.00 & -0.04\\
 \end{Highlighting}
 \end{Shaded}
 
-\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/TimeSeries-2.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{Preprocessing_files/figure-latex/TimeSeries-2.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1225,7 +1259,7 @@ VoiceAccountability & 0.57 & 0.56 & 0.17 & -0.54 & -0.31 & 1.00 & -0.04\\
 \end{Highlighting}
 \end{Shaded}
 
-\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/TimeSeries-3.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{Preprocessing_files/figure-latex/TimeSeries-3.pdf}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1284,6 +1318,6 @@ VoiceAccountability & 0.57 & 0.56 & 0.17 & -0.54 & -0.31 & 1.00 & -0.04\\
 ## (`geom_line()`).
 \end{verbatim}
 
-\pandocbounded{\includegraphics[keepaspectratio]{Exploratory-Data-Analysis_files/figure-latex/TimeSeries-4.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{Preprocessing_files/figure-latex/TimeSeries-4.pdf}}
 
 \end{document}

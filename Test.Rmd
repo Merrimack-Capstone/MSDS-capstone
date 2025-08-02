@@ -1,0 +1,54 @@
+---
+title: "Untitled"
+author: "Ray Chandonnet"
+date: "2025-07-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(readxl)
+library(writexl)
+library(skimr)
+library(knitr)
+library(kableExtra)
+library(tidyr)
+library(ggpmisc)
+library(forcats)
+library(corrplot)
+library(naniar)
+library(reshape2)
+library(scales)
+```
+
+```{r Missingness}
+FirstCutData <- read_xlsx(path = here::here("Data","FirstCutData.xlsx"))
+missing_heatmap_data <- FirstCutData %>%
+  group_by(year) %>%
+  summarise(across(everything(), ~mean(is.na(.)) * 100)) %>%
+  pivot_longer(-year, names_to = "variable", values_to = "pct_missing")
+
+# Step 2: Plot with stoplight colors
+stoplight <- c("#1a9641", "#ffea00", "#d7191c")
+ggplot(missing_heatmap_data, aes(x = year, y = variable, fill = pct_missing)) +
+  geom_tile(color = "white") +
+  scale_fill_gradientn(
+    colours = stoplight,
+    values = scales::rescale(c(0, 25, 100)),
+    limits = c(0, 100),
+    name = "% Missing"
+  ) +
+  labs(
+    title = "Missing Data Heatmap",
+    x = "Year",
+    y = "Variable"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid = element_blank()
+  )
+```
