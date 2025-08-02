@@ -86,7 +86,13 @@ PrimaryFields <- c(PrimaryFields, "Income Group")
 # Subset the cleaned dataset using that list of fields
 FirstCutData <- CleanedData %>%
   select(all_of(PrimaryFields))
-write_xlsx(FirstCutData, path = here::here("Data","FirstCutData.xlsx"))
+FirstCutData$`Income Group` <- factor(
+  FirstCutData$`Income Group`,
+  levels = c("Low income", "Lower middle income", 
+             "Upper middle income", "High income"),
+  ordered = TRUE 
+)
+saveRDS(FirstCutData, file = here::here("Data","FirstCutData.rds"))
 ```
 
 ```{r SummaryData, results='asis', echo=FALSE}
@@ -147,10 +153,7 @@ ggplot(FirstCutData, aes(x = InternetUsersPct, y = HDI_Index)) +
   theme_minimal()
 
 FirstCutDataFiltered <- FirstCutData[!is.na(FirstCutData$`Income Group`), ]
-FirstCutDataFiltered$`Income Group` <- factor(
-  FirstCutDataFiltered$`Income Group`,
-  levels = c("Low income", "Lower middle income", "Upper middle income", "High income")
-)
+
 ggplot(FirstCutDataFiltered, aes(x = InternetUsersPct, y = HDI_Index, color = `Income Group`)) +
   geom_point(alpha = 0.7) +
   geom_smooth(method = "lm", se = TRUE) +
