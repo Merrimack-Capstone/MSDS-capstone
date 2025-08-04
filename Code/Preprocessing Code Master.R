@@ -411,6 +411,174 @@ MissingnessByYear(PreProcessingData)
 MissingnessByCountry(PreProcessingData, 30)
 OverallMissingnessHeatmap(PreProcessingData)
 
+PreProcessingData %>%
+  select(VoiceAccountability, RuleOfLaw, PoliticalStability, GovtEffectiveness, CorruptionScore) %>%
+  pivot_longer(everything(), names_to = "Variable", values_to = "Value") %>%
+  group_by(Variable) %>%
+  summarize(
+    Min = min(Value, na.rm = TRUE),
+    Max = max(Value, na.rm = TRUE),
+    Mean = mean(Value, na.rm = TRUE),
+    Median = median(Value, na.rm = TRUE),
+    Count = sum(!is.na(Value))
+  ) %>%
+  arrange(Variable) %>%
+  knitr::kable(digits = 3)
+
+# Filter to years 2000–2003 and select the variables of interest
+PreProcessingData %>%
+  filter(year %in% 2000:2003) %>%
+  select(CountryCode, year, 
+         VoiceAccountability, RuleOfLaw, PoliticalStability, GovtEffectiveness, CorruptionScore) %>%
+  pivot_longer(cols = -c(CountryCode, year), names_to = "Variable", values_to = "Value") %>%
+  group_by(year, Variable) %>%
+  summarize(
+    mean_value = mean(Value, na.rm = TRUE),
+    n_countries = sum(!is.na(Value)),
+    .groups = "drop"
+  ) %>%
+  ggplot(aes(x = year, y = mean_value)) +
+  geom_line(color = "darkgreen") +
+  geom_point(aes(size = n_countries), color = "darkgreen") +
+  facet_wrap(~ Variable, scales = "fixed") +  # force same Y-axis for all plots
+ # ylim(-0.1, 0.1) +  # WGI scale range
+  labs(
+    title = "Average Values (2000–2003) for Key Governance Indicators",
+    x = "Year",
+    y = "Average Value",
+    size = "Countries with data"
+  ) +
+  scale_x_continuous(breaks = 2000:2003) +
+  theme_minimal()
+
+gov_vars <- c("CorruptionScore", "GovtEffectiveness", "PoliticalStability", 
+             "RuleOfLaw", "VoiceAccountability")
+
+delta_check <- PreProcessingData %>%
+  filter(year %in% c(2000, 2002, 2003)) %>%
+  select(CountryCode, year, all_of(gov_vars)) %>%
+  pivot_longer(cols = -c(CountryCode, year), names_to = "Variable", values_to = "Value") %>%
+  pivot_wider(names_from = year, values_from = Value, names_prefix = "year_") %>%
+  filter(!is.na(year_2000) & !is.na(year_2002) & !is.na(year_2003)) %>%
+  mutate(
+    slope_2000_2002 = (year_2002 - year_2000) / 2,
+    slope_2002_2003 = (year_2003 - year_2002) / 1,
+    slope_diff = abs(slope_2000_2002 - slope_2002_2003),
+    changed_direction = sign(slope_2000_2002) != sign(slope_2002_2003)
+  )
+
+delta_check %>%
+  group_by(Variable) %>%
+  summarize(
+    mean_slope_diff = mean(slope_diff),
+    pct_large_deviation = mean(slope_diff > 0.25) * 100,
+    max_deviation = max(slope_diff),
+    n_chg_direction = sum(changed_direction),
+    n = n()
+  ) %>%
+  arrange(desc(pct_large_deviation))
+
+# Since there is a decent amount of deviation at the country level across 2020-2023,
+# including that the slope of the curve changes direction more than 50% of the time,
+# we are using a quadratic fit formula to estimate 2001 using data from 2000, 2002
+# and 2003 - unless 2003 doesn't exist in which we case we interpolate 2000-2002
+# or leave NA if insufficient data to do that
+
+gov_vars <- c("CorruptionScore", "GovtEffectiveness", "PoliticalStability",
+              "RuleOfLaw", "VoiceAccountability")
+
+PreProcessingData <- PreProcessingData %>%
+  arrange(CountryCode, year) %>%
+  group_by(CountryCode) %>%
+  group_modify(~{
+    g <- .x
+    for (v in gov_vars) {
+      # only attempt if 2001 exists and is NA
+      if (any(g$year == 2001) && is.na(g[[v]][g$year == 2001])) {
+        # gather supporting points
+        pts <- g %>% filter(year %in% c(2000, 2002, 2003)) %>%
+          select(year, !!rlang::sym(v)) %>% stats::na.omit()
+        
+        if (nrow(pts) >= 3) {
+          # quadratic fit through 2000, 2002, 2003
+          mdl <- lm(formula = pts[[v]] ~ poly(pts$year, 2, raw = TRUE))
+          pred <- predict(mdl, newdata = data.frame(year = 2001))[1]
+          pred <- max(-2.5, min(2.5, pred))  # clamp to WGI range
+          g[[v]][g$year == 2001] <- pred
+          
+        } else {
+          # fallback: linear midpoint if 2000 and 2002 exist
+          y0 <- g[[v]][g$year == 2000]
+          y2 <- g[[v]][g$year == 2002]
+          if (length(y0) == 1 && length(y2) == 1 && !is.na(y0) && !is.na(y2)) {
+            pred <- (y0 + y2) / 2
+            pred <- max(-2.5, min(2.5, pred))
+            g[[v]][g$year == 2001] <- pred
+          }
+        }
+      }
+    }
+    g
+  }) %>%
+  ungroup()
+
+# Rerun all charts. 
+MissingnessByVariable(PreProcessingData)
+MissingnessByYear(PreProcessingData)
+MissingnessByCountry(PreProcessingData, 30)
+OverallMissingnessHeatmap(PreProcessingData)
+
+# The obvious one that's msising:  Delete observations with no HDI Index and/or
+# InternetPct since these are fundamental to the study
+
+PreProcessingData <- PreProcessingData %>%
+  filter(!is.na(InternetUsersPct) & !is.na(HDI_Index))
+
+# Rerun all charts. 
+MissingnessByVariable(PreProcessingData)
+MissingnessByYear(PreProcessingData)
+MissingnessByCountry(PreProcessingData, 30)
+OverallMissingnessHeatmap(PreProcessingData)
+
+# Heatmap of missingness for Liechtenstein (white=present, red=missing)
+code <- "LIE"
+missing_heatmap_data <- PreProcessingData %>%
+  filter(CountryCode == code) %>%
+  select(-CountryCode) %>%
+  pivot_longer(cols = -year, names_to = "variable", values_to = "value") %>%
+  mutate(Status = ifelse(is.na(value), "Missing", "Present"))
+
+
+# Optional: order variables by overall missingness (most missing at top)
+var_order <- missing_heatmap_data %>%
+  dplyr::group_by(variable) %>%
+  dplyr::summarize(frac_missing = mean(Status == "Missing"), .groups = "drop") %>%
+  dplyr::arrange(dplyr::desc(frac_missing)) %>%
+  dplyr::pull(variable)
+
+missing_heatmap_data <- missing_heatmap_data %>%
+  dplyr::mutate(variable = factor(variable, levels = var_order))
+
+# 2) Plot: white = Present, red = Missing
+print(
+  ggplot(missing_heatmap_data, aes(x = year, y = variable, fill = Status)) +
+    geom_tile(color = "white") +
+    scale_fill_manual(values = c("Present" = "white", "Missing" = "red"), name = NULL) +
+    labs(
+      title = paste0("Data Availability Heatmap: ", code),
+      x = "year",
+      y = "variable"
+    ) +
+    theme_minimal(base_size = 11) +
+    theme(
+      panel.grid = element_blank(),
+      axis.text.x = element_text(angle = 45, hjust = 1)
+    )
+)
+
+
+
+
 # Set up HDI Bins
 Preprocessing_classified_data <- PreProcessingData %>%
   mutate(
