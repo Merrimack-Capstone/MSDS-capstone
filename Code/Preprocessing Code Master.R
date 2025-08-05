@@ -883,7 +883,8 @@ data_recipe <- Preprocessing_combined_scores_data %>%
 transformed_recipe <- prep(data_recipe)
 
 # Bake the data
-TransformedData <- bake(transformed_recipe, new_data = Preprocessing_combined_scores_data)
+TransformedData <- bake(transformed_recipe, 
+                        new_data = Preprocessing_combined_scores_data)
 
 # Yeo-Johnson Output
 print("\nEstimated lambdas for transformed variables:")
