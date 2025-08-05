@@ -870,7 +870,13 @@ print(Preprocessing_combined_scores_data)
 # Yeo-Johnson Transformation to handle skewness
 
 numeric_cols <- Preprocessing_combined_scores_data %>%
-  select(where(is.numeric), -year) %>%
+  select(where(is.numeric), -year,
+                            InternetUsersPct, 
+                            Lag1_InternetUsersPct, 
+                            Lag2_InternetUsersPct,
+                            YearlyChgInternet, 
+                            Lag1_YearlyChgInternet,
+                            Lag2_YearlyChgInternet) %>%
   names()
 
 # Preprocessing recipe 
@@ -904,13 +910,21 @@ print(TransformedData %>% head())
 # PCA SECTION 
 # PCA Recipe
 numeric_cols_for_pca <- TransformedData %>%
-  select(where(is.numeric), -year) %>%
+  select(where(is.numeric), -year, 
+         -HDI_Index,
+         -Lag1_InternetUsersPct, 
+         -Lag2_InternetUsersPct, 
+         -Cumulative3yrChg_InternetUsersPct,
+         -Lag2_YearlyChgInternet,
+         -Lag1_YearlyChgInternet, 
+         -YearlyChgInternet,
+         -YearlyChgHDI) %>%
   names()
 
 pca_recipe <- TransformedData %>%
   recipe() %>%
-  step_normalize(all_of(numeric_cols_for_pca)) %>%
   step_impute_mean(all_of(numeric_cols_for_pca)) %>%
+  step_normalize(all_of(numeric_cols_for_pca)) %>%
   step_pca(all_of(numeric_cols_for_pca), num_comp = 5, id = "pca")
 
 pca_results <- prep(pca_recipe)
@@ -959,6 +973,11 @@ print("\nLoadings for each principal component:")
 print(pca_loadings_long)
 
 # PCA Biplot for HDI Category
+PCAData$HDI_Category <- factor(
+  PCAData$HDI_Category,
+  levels = c("Very high human development", "High human development","Medium human development","Low human development")
+)
+
 
 pca_biplot <- ggplot(PCAData, aes(x = PC1, y = PC2)) +
   
@@ -969,19 +988,20 @@ pca_biplot <- ggplot(PCAData, aes(x = PC1, y = PC2)) +
   
   geom_segment(
     data = pca_loadings_wide,
-    aes(x = 0, y = 0, xend = PC1 * 6, yend = PC2 * 6), 
+    aes(x = 0, y = 0, xend = PC1 * 24, yend = PC2 * 24),
     arrow = arrow(length = unit(0.3, "cm")),
     color = "gray",
-    linewidth = 0.5 
+    linewidth = 0.5
   ) +
   
   geom_text(
     data = pca_loadings_wide,
-    aes(x = PC1 * 6.5, y = PC2 * 6.5, label = terms), 
+    aes(x = PC1 * 28, y = PC2 * 32, label = terms),
     color = "black",
-    size = 3, 
-    hjust = 0.5, vjust = 0.5
+    size = 2,
+    hjust = 0.5, vjust = 3
   ) +
+  
   
   labs(
     title = "PCA Biplot of PC1 and PC2",
@@ -990,6 +1010,8 @@ pca_biplot <- ggplot(PCAData, aes(x = PC1, y = PC2)) +
   ) +
 
   coord_fixed(ratio = 1) +
+  scale_x_continuous(limits = c(-12, 12)) +
+  scale_y_continuous(limits = c(-12, 12)) +
   
   theme_minimal()
 
