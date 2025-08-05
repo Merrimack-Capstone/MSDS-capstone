@@ -17,23 +17,69 @@ library(stringr)
 library(recipes)
 library(broom)
 library(here)
-
-
-#RawData <- readRDS(here::here("Data","PreEDA_DataFrame.rds"))
-#names(RawData) <- make.unique(names(RawData), sep = ".")
-#FieldActions <- read_excel(here::here("Data", "FieldActions.xlsx"))
-#CleanedData <- RawData # make a copy to preserve original
-#IncomeData <- read_excel(here::here("Data", "Income Group Data.xlsx")) # Import income data
+library(rlang)
 
 stoplight <- c("#1a9641", "#ffea00", "#d7191c") # define heatmap colors
 
 # Here are some functions we use multiple times
 
 # Overall data missingness heatmap
+OneCountryMissingness <- function(PreProcessingData, code) {
+  
+  HeatmapData <- PreProcessingData %>%
+    select(-Lag1_InternetUsersPct,
+           -Lag2_InternetUsersPct,
+           -Lag1_YearlyChgInternet,
+           -Lag2_YearlyChgInternet,
+           -Cumulative3yrChg_InternetUsersPct,
+           -YearlyChgHDI,
+           -YearlyChgInternet)
+  
+  missing_heatmap_data <- HeatmapData %>%
+    filter(CountryCode == code) %>%
+    select(-CountryCode, -CountryName, -IncomeGroup) %>%
+    pivot_longer(cols = -year, names_to = "variable", values_to = "value") %>%
+    mutate(Status = ifelse(is.na(value), "Missing", "Present"))
+  
+  # Order variables by overall missingness (most missing at top)
+  var_order <- missing_heatmap_data %>%
+    group_by(variable) %>%
+    summarize(frac_missing = mean(Status == "Missing"), .groups = "drop") %>%
+    arrange(dplyr::desc(frac_missing)) %>%
+    pull(variable)
+  
+  missing_heatmap_data <- missing_heatmap_data %>%
+    mutate(variable = factor(variable, levels = var_order))
+  
+  # 2) Plot: white = Present, red = Missing
+  print(
+    ggplot(missing_heatmap_data, aes(x = year, y = variable, fill = Status)) +
+      geom_tile(color = "white") +
+      scale_fill_manual(values = c("Present" = "white", "Missing" = "red"), name = NULL) +
+      labs(
+        title = paste0("Data Availability Heatmap: ", code),
+        x = "year",
+        y = "variable"
+      ) +
+      theme_minimal(base_size = 11) +
+      theme(
+        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1)
+      )
+  )
+}
 
 OverallMissingnessHeatmap <- function(PreProcessingData) {
+  HeatmapData <- PreProcessingData %>%
+    select(-Lag1_InternetUsersPct,
+           -Lag2_InternetUsersPct,
+           -Lag1_YearlyChgInternet,
+           -Lag2_YearlyChgInternet,
+           -Cumulative3yrChg_InternetUsersPct,
+           -YearlyChgHDI,
+           -YearlyChgInternet)
   # Step 1: Compute % missing per variable per year
-  missing_heatmap_data <- PreProcessingData %>%
+  missing_heatmap_data <- HeatmapData %>%
     group_by(year) %>%
     summarize(across(everything(), ~mean(is.na(.)) * 100)) %>%
     pivot_longer(-year, names_to = "variable", values_to = "pct_missing")
@@ -62,10 +108,20 @@ OverallMissingnessHeatmap <- function(PreProcessingData) {
 # Missingness chart by variable
 
 MissingnessByVariable <- function(PreProcessingData) {
-  PreProcessingData %>%
+  PlotData <- PreProcessingData %>%
+    select(-Lag1_InternetUsersPct,
+           -Lag2_InternetUsersPct,
+           -Lag1_YearlyChgInternet,
+           -Lag2_YearlyChgInternet,
+           -Cumulative3yrChg_InternetUsersPct,
+           -YearlyChgHDI,
+           -YearlyChgInternet)
+  VariableMissing <- PlotData %>%
     summarize(across(everything(), ~ mean(is.na(.)) * 100)) %>%
-    pivot_longer(cols = everything(), names_to = "Variable", values_to = "MissingPct") %>%
-    ggplot(aes(x = reorder(Variable, MissingPct), y = MissingPct, fill = MissingPct)) +
+    pivot_longer(cols = everything(), names_to = "Variable", values_to = "MissingPct")
+  print(ggplot(data = VariableMissing,
+               aes(x = reorder(Variable, MissingPct), 
+                   y = MissingPct, fill = MissingPct)) +
     geom_col() +
     coord_flip() +
     scale_fill_gradientn(
@@ -80,51 +136,66 @@ MissingnessByVariable <- function(PreProcessingData) {
       x = "Variable",
       y = "% Missing"
     ) +
-    theme_minimal()
-
+    theme_minimal())
 }
 
 # Missingness chart by year
 MissingnessByYear <- function(PreProcessingData) {
-  PreProcessingData %>%
+  PlotData <- PreProcessingData %>%
+    select(-Lag1_InternetUsersPct,
+           -Lag2_InternetUsersPct,
+           -Lag1_YearlyChgInternet,
+           -Lag2_YearlyChgInternet,
+           -Cumulative3yrChg_InternetUsersPct,
+           -YearlyChgHDI,
+           -YearlyChgInternet)
+  
+  MissingYear <- PlotData %>%
     group_by(year) %>%
     summarize(across(everything(), ~ mean(is.na(.)) * 100)) %>%
     pivot_longer(-year, names_to = "variable", values_to = "pct_missing") %>%
     group_by(year) %>%
     summarize(pct_missing = mean(pct_missing)) %>%
-    arrange(year) %>%
-    ggplot(aes(y = factor(year), x = pct_missing, fill = pct_missing)) +
-    geom_col() +
-    scale_fill_gradientn(
-      colors = stoplight,
-      values = rescale(c(0, 50, 100)),
-      name = "% Missing",
-      limits = c(0, 100),
-      breaks = c(0, 50, 100),
-      labels = c("0", "50", "100")
-    ) +
-    labs(
-      y = "Year",
-      x = "% Missing (All Variables)",
-      title = "Data Sparseness by Year"
-    ) +
-    theme_minimal() +
-    theme(
-      axis.text.y = element_text(size = 8),
-      legend.position = "right"
-    ) 
+    arrange(year)
+  print(ggplot(data = MissingYear,
+               aes(y = factor(year), 
+                   x = pct_missing, fill = pct_missing)) + 
+          geom_col() + 
+          scale_fill_gradientn(colors = stoplight,
+                               values = rescale(c(0, 50, 100)),
+                               name = "% Missing",
+                               limits = c(0, 100),
+                               breaks = c(0, 50, 100),
+                               labels = c("0", "50", "100")) +
+          labs(y = "Year",
+               x = "% Missing (All Variables)",
+               title = "Data Sparseness by Year") +
+          theme_minimal() +
+          theme(axis.text.y = element_text(size = 8),
+                legend.position = "right"
+    )) 
 }
 
 MissingnessByCountry <- function(PreProcessingData, threshold) {
-  PreProcessingData %>%
+  PlotData <- PreProcessingData %>%
+    select(-Lag1_InternetUsersPct,
+           -Lag2_InternetUsersPct,
+           -Lag1_YearlyChgInternet,
+           -Lag2_YearlyChgInternet,
+           -Cumulative3yrChg_InternetUsersPct,
+           -YearlyChgHDI,
+           -YearlyChgInternet)
+  CountryMissing <- PlotData %>%
     group_by(CountryCode) %>%
     summarize(across(everything(), ~ mean(is.na(.)) * 100)) %>%
     pivot_longer(-CountryCode, names_to = "variable", values_to = "pct_missing") %>%
     group_by(CountryCode) %>%
     summarize(pct_missing = mean(pct_missing)) %>%
     filter(pct_missing >= threshold) %>%
-    arrange(pct_missing) %>%
-    ggplot(aes(y = reorder(CountryCode, pct_missing), x = pct_missing, fill = pct_missing)) +
+    arrange(pct_missing) 
+  print(ggplot(data = CountryMissing, 
+               aes(y = reorder(CountryCode, pct_missing), 
+                   x = pct_missing, fill = pct_missing)) +
     geom_col() +
     scale_fill_gradientn(
       colors = stoplight,
@@ -143,10 +214,60 @@ MissingnessByCountry <- function(PreProcessingData, threshold) {
     theme(
       axis.text.y = element_text(size = 6),
       legend.position = "right"
-    )
+    ))
+}
+# This function just reproduces our four missingness plots
+FourPlots <- function(PreProcessingData, cutoff) {
+  MissingnessByVariable(PreProcessingData)
+  MissingnessByYear(PreProcessingData)
+  MissingnessByCountry(PreProcessingData, cutoff)
+  OverallMissingnessHeatmap(PreProcessingData)
 }
 
+# This function imputes missing data using time trend fitting, as follows:
+# The variable name is passed as an argument so the function can work with 
+# multiple variables.  A floor and ceiling value are also passed
+#
+# For the missing data for each CountryCode group:
+#
+# If there are 3 ore more valid data points, impute the rest quadratically
+# If there are 2 valid data points, impute the rest quadratically
+# If there is 1 valid data point, carry it throughout the rest of the observations
+# If there are none, leave it as NA
 # Read in the data produced in the EDA exercise
+
+impute_time_trend <- function(PreProcessingData, var_name, floor, cap) {
+  var_sym <- rlang::ensym(var_name)
+  
+  PreProcessingData %>%
+    group_by(CountryName) %>%
+    group_modify(~ {
+      df_country <- .x
+      y <- df_country[[as_name(var_sym)]]
+      known <- df_country %>% filter(!is.na(y))
+      
+      if (nrow(known) >= 3) {
+        model <- lm(y ~ poly(year, 2, raw = TRUE), data = df_country)
+        preds <- predict(model, newdata = df_country)
+      } else if (nrow(known) == 2) {
+        model <- lm(y ~ year, data = df_country)
+        preds <- predict(model, newdata = df_country)
+      } else if (nrow(known) == 1) {
+        preds <- rep(known[[rlang::as_name(var_sym)]][1], nrow(df_country))
+      } else {
+        preds <- rep(NA_real_, nrow(df_country))
+      }
+      
+      missing_idx <- is.na(y) & !is.na(preds)
+      preds_clipped <- pmin(cap, pmax(floor, preds[missing_idx]))
+      df_country[[rlang::as_name(var_sym)]][missing_idx] <- preds_clipped
+      df_country
+    }) %>%
+    ungroup()
+}
+
+###################################################################
+
 PreProcessingData <- readRDS(here::here("Data","FirstCutData.rds"))
 
 # Drop GiniCoeff, IHDI_Index and FixedIntSUBS.  The first 2 we aren't 
@@ -233,10 +354,7 @@ PreProcessingData <- PreProcessingData %>%
   filter(!(year %in% c(1995, 1996, 1997, 1998, 1999, 2023)))
 
 # Rerun all charts.  Now the real work begins
-MissingnessByVariable(PreProcessingData)
-MissingnessByYear(PreProcessingData)
-MissingnessByCountry(PreProcessingData, 30)
-OverallMissingnessHeatmap(PreProcessingData)
+FourPlots(PreProcessingData,30)
 
 # This function plots average UCHCServiceCoverage by year 
 
@@ -384,11 +502,8 @@ PlotSlums <- function(PreProcessingData){
 # Plot PopInSLums by year
 PlotSlums(PreProcessingData)
 
-# Rerun all charts.  Now the real work begins
-MissingnessByVariable(PreProcessingData)
-MissingnessByYear(PreProcessingData)
-MissingnessByCountry(PreProcessingData, 30)
-OverallMissingnessHeatmap(PreProcessingData)
+# Rerun all charts.  
+FourPlots(PreProcessingData,30)
 
 # Linearly interpolate PopInSlums
 PreProcessingData <- PreProcessingData %>%
@@ -405,11 +520,8 @@ PreProcessingData <- PreProcessingData %>%
 # Re-plot
 PlotSlums(PreProcessingData)
 
-# Rerun all charts.  Now the real work begins
-MissingnessByVariable(PreProcessingData)
-MissingnessByYear(PreProcessingData)
-MissingnessByCountry(PreProcessingData, 30)
-OverallMissingnessHeatmap(PreProcessingData)
+# Rerun all charts.  
+FourPlots(PreProcessingData,30)
 
 PreProcessingData %>%
   select(VoiceAccountability, RuleOfLaw, PoliticalStability, GovtEffectiveness, CorruptionScore) %>%
@@ -423,7 +535,7 @@ PreProcessingData %>%
     Count = sum(!is.na(Value))
   ) %>%
   arrange(Variable) %>%
-  knitr::kable(digits = 3)
+  kable(digits = 3)
 
 # Filter to years 2000–2003 and select the variables of interest
 PreProcessingData %>%
@@ -523,62 +635,190 @@ PreProcessingData <- PreProcessingData %>%
   ungroup()
 
 # Rerun all charts. 
-MissingnessByVariable(PreProcessingData)
-MissingnessByYear(PreProcessingData)
-MissingnessByCountry(PreProcessingData, 30)
-OverallMissingnessHeatmap(PreProcessingData)
+FourPlots(PreProcessingData,30)
 
-# The obvious one that's msising:  Delete observations with no HDI Index and/or
+# The obvious one that's missing:  Delete observations with no HDI Index and/or
 # InternetPct since these are fundamental to the study
 
 PreProcessingData <- PreProcessingData %>%
   filter(!is.na(InternetUsersPct) & !is.na(HDI_Index))
 
 # Rerun all charts. 
-MissingnessByVariable(PreProcessingData)
-MissingnessByYear(PreProcessingData)
-MissingnessByCountry(PreProcessingData, 30)
-OverallMissingnessHeatmap(PreProcessingData)
+FourPlots(PreProcessingData,30)
 
 # Heatmap of missingness for Liechtenstein (white=present, red=missing)
 code <- "LIE"
-missing_heatmap_data <- PreProcessingData %>%
-  filter(CountryCode == code) %>%
-  select(-CountryCode) %>%
-  pivot_longer(cols = -year, names_to = "variable", values_to = "value") %>%
-  mutate(Status = ifelse(is.na(value), "Missing", "Present"))
+OneCountryMissingness(PreProcessingData,code)
 
+# Too much data missing from CountryCode "LIE" so drop it
+PreProcessingData <- PreProcessingData %>%
+  filter(CountryCode != "LIE")
 
-# Optional: order variables by overall missingness (most missing at top)
-var_order <- missing_heatmap_data %>%
-  dplyr::group_by(variable) %>%
-  dplyr::summarize(frac_missing = mean(Status == "Missing"), .groups = "drop") %>%
-  dplyr::arrange(dplyr::desc(frac_missing)) %>%
-  dplyr::pull(variable)
+#Plot Again
+FourPlots(PreProcessingData,10)
 
-missing_heatmap_data <- missing_heatmap_data %>%
-  dplyr::mutate(variable = factor(variable, levels = var_order))
+# Now fix the missing WaterStress data for 2022 via extrapolation
 
-# 2) Plot: white = Present, red = Missing
-print(
-  ggplot(missing_heatmap_data, aes(x = year, y = variable, fill = Status)) +
-    geom_tile(color = "white") +
-    scale_fill_manual(values = c("Present" = "white", "Missing" = "red"), name = NULL) +
-    labs(
-      title = paste0("Data Availability Heatmap: ", code),
-      x = "year",
-      y = "variable"
-    ) +
-    theme_minimal(base_size = 11) +
-    theme(
-      panel.grid = element_blank(),
-      axis.text.x = element_text(angle = 45, hjust = 1)
-    )
+## Clean base-R code: extrapolate 2022 WaterStress per country
+## - Uses last up to lookback_n non-missing pre-2022 points
+## - Requires at least min_points to fit
+## - Creates WaterStress_imputed with values ONLY for 2022 rows that were NA
+
+## ---- Parameters ----
+target_year <- 2022
+lookback_n  <- 7
+min_points  <- 3
+
+## ---- Check in advances  ----
+print(paste0("Total Countries with data for 2022: ",
+             sum(PreProcessingData$year == 2022)))
+      
+print(paste0("Countries with NA for 2022 WaterStress: ",
+             sum(PreProcessingData$year == 2022 & 
+                   is.na(PreProcessingData$WaterStress))))
+
+print(paste0("Countries with at least 3 years of WaterStress data: ",
+             sum(tapply(!is.na(PreProcessingData$WaterStress) & 
+                          PreProcessingData$year < 2022,
+                        PreProcessingData$CountryCode,sum) >= 3)))
+
+## History: pre-2022, non-missing, de-duplicated by (CountryCode, year)
+hist_idx <- !is.na(PreProcessingData$WaterStress) & PreProcessingData$year < target_year
+hist_df  <- PreProcessingData[hist_idx, c("CountryCode", "year", "WaterStress")]
+hist_df  <- hist_df[!duplicated(hist_df[, c("CountryCode", "year")]), ]
+
+## Split by country
+by_ctry <- split(hist_df, hist_df$CountryCode)
+
+## For each country, take recent lookback_n rows and fit lm; predict 2022 (or NA)
+pred_vec <- sapply(names(by_ctry), function(cc) {
+  df <- by_ctry[[cc]]
+  if (is.null(df) || nrow(df) == 0) return(NA_real_)
+  df <- df[order(df$year), ]
+  if (nrow(df) > lookback_n) df <- df[(nrow(df) - lookback_n + 1):nrow(df), ]
+  if (nrow(df) < min_points) return(NA_real_)
+  fit <- try(lm(WaterStress ~ year, data = df), silent = TRUE)
+  if (inherits(fit, "try-error")) return(NA_real_)
+  p <- as.numeric(predict(fit, newdata = data.frame(year = target_year)))
+  p
+})
+
+## Assemble predictions table (CountryCode, year=2022, pred)
+pred_df <- data.frame(
+  CountryCode = names(pred_vec),
+  year        = target_year,
+  pred        = as.numeric(pred_vec),
+  row.names   = NULL,
+  stringsAsFactors = FALSE
 )
 
+## Merge back to original; create WaterStress_imputed ONLY for 2022 missing rows
+out <- merge(
+  PreProcessingData,
+  pred_df,
+  by = c("CountryCode", "year"),
+  all.x = TRUE,
+  sort = FALSE
+)
+
+## If 2022 & WaterStress is NA & pred is not NA -> impute; else NA
+out$WaterStress_imputed <- ifelse(
+  out$year == target_year & is.na(out$WaterStress) & !is.na(out$pred),
+  out$pred,
+  NA_real_
+)
+
+## Drop helper column and return to original object name
+out$pred <- NULL
+PreProcessingData <- out
 
 
+imputed_2022 <- with(PreProcessingData,
+                     sum(year == 2022 & !is.na(WaterStress_imputed), 
+                         na.rm = TRUE))
+imputed_2022
 
+# Show me the ones that are still; NA
+still_NA_2022 <- unique(PreProcessingData$CountryCode[
+  PreProcessingData$year == 2022 & is.na(PreProcessingData$WaterStress_imputed)
+])
+still_NA_2022
+
+# Countries (among the 13) with >=3 valid pre-2022 WaterStress values
+eligible_13 <- names(which(tapply(
+  PreProcessingData$year < 2022 & !is.na(PreProcessingData$WaterStress),
+  PreProcessingData$CountryCode, sum) >= 3))
+
+eligible_13 <- intersect(still_NA_2022, eligible_13)
+eligible_13
+
+subset(PreProcessingData,
+       CountryCode %in% eligible_13 & year < 2022 ,
+       select = c("CountryCode","year","WaterStress"))
+
+ineligible_13 <- setdiff(still_NA_2022, eligible_13)
+ineligible_13
+subset(PreProcessingData,
+       CountryCode %in% ineligible_13 & year < 2022 ,
+       select = c("CountryCode","year","WaterStress"))
+# Turns out there is NO data for any of those 13 countries
+# Copy the imputed data over
+# Copy 2022 imputed into WaterStress (only where WaterStress is NA), then drop helper column
+idx <- PreProcessingData$year == 2022 & is.na(PreProcessingData$WaterStress) & !is.na(PreProcessingData$WaterStress_imputed)
+PreProcessingData$WaterStress[idx] <- PreProcessingData$WaterStress_imputed[idx]
+PreProcessingData$WaterStress_imputed <- NULL
+FourPlots(PreProcessingData,10)
+
+# We are down to four features with material missing values.   Let's see if
+# we can just drop all rows with NA values first!
+
+# Total number of rows
+total_rows <- nrow(PreProcessingData)
+
+# Number of rows with any NA
+rows_with_na <- sum(!complete.cases(PreProcessingData))
+
+# Percentage of rows that would be removed
+percent_removed <- (rows_with_na / total_rows) * 100
+
+# Number of rows remaining if you drop them
+rows_remaining <- total_rows - rows_with_na
+
+# Print results
+cat("Rows with any NA:", rows_with_na, "\n")
+cat("Percent of rows removed:", round(percent_removed, 2), "%\n")
+cat("Rows remaining:", rows_remaining, "\n")
+
+# Nope - we would lose 46.1% of our data which is simply too much.  So we will
+# impute the missing data.  That's fine for all but the top 4 variables, since
+# the rest all have <5% missingness.   We'll note it for the top 4 and run separate
+# models that don't include them
+
+# We use the impute_time_trend function to do this
+
+PreProcessingData <-impute_time_trend(PreProcessingData, CorruptionScore, -2.5, 2.5)
+PreProcessingData <-impute_time_trend(PreProcessingData, ElectricAccess, 0,100)
+PreProcessingData <-impute_time_trend(PreProcessingData, FoodIndex,-Inf, Inf)
+PreProcessingData <-impute_time_trend(PreProcessingData, GDP, -Inf, Inf)
+PreProcessingData <-impute_time_trend(PreProcessingData, GDPGrowth, -Inf, Inf)
+PreProcessingData <-impute_time_trend(PreProcessingData, GDPPerCapGrowth, -Inf, Inf)
+PreProcessingData <-impute_time_trend(PreProcessingData, GovtEduSpendPctGDP, 0, 100)
+PreProcessingData <-impute_time_trend(PreProcessingData, GovtEffectiveness, -2.5, 2.5)
+PreProcessingData <-impute_time_trend(PreProcessingData, GovtHealthSpendPerCapita, 0,Inf)
+PreProcessingData <-impute_time_trend(PreProcessingData, HealthSpendPerCapita, 0, Inf)
+PreProcessingData <-impute_time_trend(PreProcessingData, PoliticalStability, -2.5,2.5)
+PreProcessingData <-impute_time_trend(PreProcessingData, PopDensity, 0, Inf)
+PreProcessingData <-impute_time_trend(PreProcessingData, PopInSlums, 0, 100)
+PreProcessingData <-impute_time_trend(PreProcessingData, RqdEduYears, 0, 15)
+PreProcessingData <-impute_time_trend(PreProcessingData, RuleOfLaw, -2.5, 2.5)
+PreProcessingData <-impute_time_trend(PreProcessingData, RuralPopulGrowth, -Inf, Inf)
+PreProcessingData <-impute_time_trend(PreProcessingData, UHCServiceCoverage, 0, 100)
+PreProcessingData <-impute_time_trend(PreProcessingData, VoiceAccountability, -2.5, 2.5)
+PreProcessingData <-impute_time_trend(PreProcessingData, WaterStress, 0,Inf)
+FourPlots(PreProcessingData,10)
+#
+
+########################################################################
 # Set up HDI Bins
 Preprocessing_classified_data <- PreProcessingData %>%
   mutate(
@@ -634,7 +874,7 @@ numeric_cols <- Preprocessing_combined_scores_data %>%
   names()
 
 # Preprocessing recipe 
-data_recipe <- P %>%
+data_recipe <- Preprocessing_combined_scores_data %>%
   recipe() %>%
   step_YeoJohnson(all_of(numeric_cols), na_rm = TRUE)
 
@@ -667,7 +907,6 @@ numeric_cols_for_pca <- TransformedData %>%
   select(where(is.numeric), -year) %>%
   names()
 
-
 pca_recipe <- TransformedData %>%
   recipe() %>%
   step_normalize(all_of(numeric_cols_for_pca)) %>%
@@ -684,25 +923,37 @@ PCAData <- bake(pca_results, new_data = TransformedData)
 # Visualizing the PCA Data
 
 # Scree Plot
-pca_tidy <- tidy(pca_results, id = "pca")
+# Get variance explained from the tidy output
+pca_var <- tidy(pca_results, id = "pca", type = "variance") %>%
+  filter(component <= 5) %>%
+  pivot_wider(names_from = terms, values_from = value) %>%
+  mutate(PC = paste0("PC", component),
+         pct_var = `percent variance` / 100,
+         cum_pct_var = `cumulative percent variance` / 100)
 
-pca_scree_plot <- pca_tidy %>%
-  filter(component %in% c("PC1", "PC2", "PC3", "PC4", "PC5")) %>%
-  ggplot(aes(x = component, y = value)) +
-  geom_col(fill = "lightblue") +
-  scale_y_continuous(labels = scales::percent) +
+ggplot(pca_var, aes(x = PC)) +
+  geom_col(aes(y = `pct_var`), fill = "lightblue") +
+  geom_line(aes(y = `cum_pct_var`, group = 1), color = "red", linewidth = 1) +
+  geom_point(aes(y = `cum_pct_var`), color = "red", size = 2) +
+  scale_y_continuous(labels = percent_format()) +
   labs(
-    title = "Scree Plot: Variance Explained by Principal Components",
+    title = "Scree Plot with Cumulative Variance",
     x = "Principal Component",
     y = "Proportion of Variance Explained"
   ) +
   theme_minimal()
 
-print(pca_scree_plot)
+
 
 
 # PCA Loadings Results
 pca_loadings_long <- tidy(pca_results, id = "pca", type = "coef")
+pca_loadings_wide <- pca_loadings_long %>%
+  pivot_wider(
+    names_from = component,
+    values_from = value
+  )
+
 
 print("\nLoadings for each principal component:")
 print(pca_loadings_long)
