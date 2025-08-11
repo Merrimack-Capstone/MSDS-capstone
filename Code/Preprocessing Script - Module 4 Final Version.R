@@ -272,7 +272,7 @@ impute_time_trend <- function(data, var_name, floor, cap) {
 
 ###################################################################
 #
-# FEATURE ENGINEERING
+# FEATURE ENGINEERING AND DATA DROPPING
 
 # Drop GiniCoeff, IHDI_Index and FixedIntSUBS.  The first 2 we aren't 
 # using in the first go-round, and the the last one we may not get to use at all (it
