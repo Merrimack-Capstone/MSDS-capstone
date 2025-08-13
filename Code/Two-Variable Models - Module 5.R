@@ -29,438 +29,162 @@ library(RANN)
 library(xgboost)
 library(Matrix)
 library(e1071)
+library(parsnip)
+library(tidymodels)
+library(MASS)
 
+print_regressions <- function(predictions){
+  # Build results frame from your tidymodels objects
+  results_lm <- predictions %>%
+    transmute(Actual = HDI_Index, Predicted = .pred)
+  
+  # Scatter: Actual vs Predicted (HDI Index)
+  p_scatter <- ggplot(results_lm, aes(x = Actual, y = Predicted)) +
+    geom_point(alpha = 0.6) +
+    geom_abline(intercept = 0, slope = 1, color = "red",
+                linetype = "dashed", linewidth = 1) +
+    coord_equal(xlim = c(0.3, 1), ylim = c(0.3, 1)) +
+    labs(
+      title = "Actual vs Predicted HDI Index",
+      x = "Actual HDI Index",
+      y = "Predicted HDI Index"
+    ) +
+    theme_minimal()
+  print(p_scatter)
+  
+  # Residuals histogram
+  results_lm$Residuals <- results_lm$Actual - results_lm$Predicted
+  p_resid <- ggplot(results_lm, aes(x = Residuals)) +
+    geom_histogram(bins = 30, fill = "lightblue", color = "black") +
+    geom_vline(xintercept = 0, color = "red", linetype = "dashed", linewidth = 1) +
+    labs(
+      title = "Residuals Distribution (HDI Index)",
+      x = "Residual (Actual - Predicted)",
+      y = "Count"
+    ) +
+    theme_minimal()
+  print(p_resid)
+}
 # Read in the saved training and test data sets
 train_data <- readRDS(here::here("Data", "train_data.rds"))
 test_data <- readRDS(here::here("Data", "test_data.rds"))
 
-
-# This first model is an XGBoost model.  It will predict the HDI category, not the 
-# index, and it uses static current InternetUsersPct as our "key" feature
+# Start with basic regression
 
 model_columns <- c(
-  "CountryCode", "HDI_Category", "FoodIndex", "ElectricAccess", "PopDensity", 
-  "PopInSlums", "WaterStress", "InternetUsersPct", "GDPPerCapGrowth", "GDPGrowth",
-  "GDP", "PoliticalStability", "RqdEduYears", "GovtEduSpendPctGDP",
-  "UHCServiceCoverage", "RuralPopulGrowth", "VoiceAccountability"
+  "HDI_Index", "InternetUsersPct"
   )
 
 # Filter the training and test data to include only the specified columns
 
-train_filtered <- train_data %>% select(all_of(model_columns))
-test_filtered <- test_data %>% select(all_of(model_columns))
+train_filtered <- train_data %>% dplyr::select(all_of(model_columns))
+test_filtered <- test_data %>% dplyr::select(all_of(model_columns))
 
 # Use na.omit() to remove rows with any NA values 
 
 train_filtered <- na.omit(train_filtered)
 test_filtered <- na.omit(test_filtered)
 
-# Keep a country code vector from training data (for constructing folds)
-train_ids <- train_filtered$CountryCode   # same row order as train_matrix / dtrain
-
-# Remove the country code from the predictor data frames
-train_predictors <- train_filtered %>% select(-CountryCode)
-test_predictors <- test_filtered %>% select(-CountryCode)
-
-# For classification, the target variable must be a numeric integer
-HDI_levels <- c(
-  "Low human development",
-  "Medium human development",
-  "High human development",
-  "Very high human development"
-)
-
-train_target <- as.integer(factor(train_filtered$HDI_Category, levels = HDI_levels)) - 1
-test_target <- as.integer(factor(test_filtered$HDI_Category, levels = HDI_levels)) - 1
-num_class <- length(unique(train_target))
-
-# Remove the target variable from the predictor data frames
-train_predictors <- train_predictors %>% select(-HDI_Category)
-test_predictors <- test_predictors %>% select(-HDI_Category)
-
-# Combine the predictor data frames to create a sparse matrix that has the same
-# columns and column order for both training and test data.
-
-combined_predictors <- bind_rows(train_predictors, test_predictors)
-
-# Convert all factor/character columns to a sparse matrix for XGBoost
-
-combined_matrix <- sparse.model.matrix(~ . -1, data = combined_predictors)
+# libs
 
 
-# Split the combined matrix back into training and test matrices
+set.seed(123)
 
-train_matrix <- combined_matrix[1:nrow(train_predictors),]
-test_matrix <- combined_matrix[(nrow(train_predictors)+1):nrow(combined_matrix),]
+myrecipe <- recipe(HDI_Index ~ InternetUsersPct, data = train_filtered)
 
-# Train XGBoost Model with hyperparameter Tuning and cross-validation 
+mymodel <- linear_reg() %>% 
+  set_engine("lm")
 
-dtrain <- xgb.DMatrix(data = train_matrix, label = train_target)
-dtest <- xgb.DMatrix(data = test_matrix, label = test_target)
+myworkflow <- workflow() %>% 
+  add_recipe(myrecipe) %>% 
+  add_model(mymodel)
 
-# Define a grid of hyperparameters to search over
+fitted_model <- fit(myworkflow, data = train_filtered)
 
-hyper_grid <- expand.grid(
-  eta = c(0.01, 0.1, 0.3),
-  max_depth = c(6, 12, 18),
-  subsample = c(0.6, 0.8, 1.0) 
-)
+predictions <- predict(fitted_model, new_data = test_filtered) %>% 
+  bind_cols(test_filtered)
 
-# Create an empty list to store the results
+metrics <- metric_set(rmse, mae, rsq)
+metrics(predictions, truth = HDI_Index, estimate = .pred)
 
-results_list <- list()
+# (optional) coefficients + summary
+tidy(extract_fit_parsnip(fitted_model))
+glance(extract_fit_parsnip(fitted_model))
 
-# We are going to Iterate over each combination of hyperparameters.  The model uses
-# k fold cross-validation - Because this is temporal data and so observations for a
-# given country are autocorrelated, we need to make sure that whole countries are 
-# contained within folds, much as we did with the test/training split.
+print_regressions(predictions)
+
+# Let's try a quadratic regression, see if that's better:
+set.seed(123)
+
+myrecipe <- recipe(HDI_Index ~ InternetUsersPct, data = train_filtered) %>%
+  step_poly(InternetUsersPct, degree=2)
+
+mymodel <- linear_reg() %>% 
+  set_engine("lm")
+
+myworkflow <- workflow() %>% 
+  add_recipe(myrecipe) %>% 
+  add_model(mymodel)
+
+fitted_model <- fit(myworkflow, data = train_filtered)
+
+predictions <- predict(fitted_model, new_data = test_filtered) %>% 
+  bind_cols(test_filtered)
+
+metrics <- metric_set(rmse, mae, rsq)
+metrics(predictions, truth = HDI_Index, estimate = .pred)
+
+# (optional) coefficients + summary
+tidy(extract_fit_parsnip(fitted_model))
+glance(extract_fit_parsnip(fitted_model))
+
+print_regressions(predictions)
+
+############################################################################
 #
-# We also use the same folds for each iteration so that when selecting the best set of
-# hyperparameters we are comparing apples to apples
+# Predicting HDI CATEGORY
 
-# Create the folds by country
-k <- 5 
-set.seed(123)
-countries <- unique(train_ids)
-fold_id <- sample(rep(1:k, length.out = length(countries)))
-folds <- lapply(1:k, function(j) which(train_ids %in% countries[fold_id == j]))
+# Use the category outcome instead of the index
+model_columns <- c("HDI_Category", "InternetUsersPct")
 
-# Set maximum threads to avoid crashing
-Sys.setenv(OMP_NUM_THREADS="1", MKL_NUM_THREADS="1")
+train_filtered <- train_data %>% dplyr::select(all_of(model_columns)) %>% drop_na()
+test_filtered  <- test_data  %>% dplyr::select(all_of(model_columns)) %>% drop_na()
 
-# Run and evaluate model for each set of hyperparameters
-for (i in 1:nrow(hyper_grid)) {
-  current_eta <- hyper_grid$eta[i]
-  current_max_depth <- hyper_grid$max_depth[i]
-  current_subsample <- hyper_grid$subsample[i]
-  
-  params <- list(
-    booster = "gbtree",
-    objective = "multi:softprob",
-    num_class = num_class,
-    eta = current_eta,
-    max_depth = current_max_depth,
-    subsample = current_subsample,
-    colsample_bytree = 0.8,
-    nthread = 1,
-    seed = 123
-  )
+long <- c("Low human development","Medium human development",
+          "High human development","Very high human development")
+short <- c("Low","Medium","High","Very High")
 
-# We use xgb.cv for hyperparameter tuning.     
-
-  cv_model <- xgb.cv(
-    params = params,
-    data = dtrain,
-    nrounds = 3000,
-    folds = folds,
-    metrics = "mlogloss",
-    early_stopping_rounds = 10,
-    verbose = 0
-  )
-  
-# Get the best cross-validation accuracy
-  
-  best_iteration <- cv_model$best_iteration
-  cv_loglossmean <- cv_model$evaluation_log[best_iteration,]$test_mlogloss_mean
-  roundsrun <- nrow(cv_model$evaluation_log)
-  
-# Store the results
-  
-  results_list[[i]] <- list(
-    eta = current_eta,
-    max_depth = current_max_depth,
-    roundsrun = roundsrun,
-    subsample = current_subsample,
-    loglossmean = cv_loglossmean,
-    best_iteration = best_iteration
-  )
-  
-  cat(paste0("Model ", i, " of ",nrow(hyper_grid),
-             ", Settings: eta=", current_eta, 
-             ", max_depth=", current_max_depth,
-             ", subsample=", current_subsample,
-             ", Rounds Run=", roundsrun,
-             " | CV Logloss=", round(cv_loglossmean, 4), 
-             " (Best Iteration: ", best_iteration, ")\n"))
-  
-}  #Closes For Loop
-
-# Summarize results
-results_df <- do.call(rbind, lapply(results_list, as.data.frame))
-best_model_settings <- results_df[which.min(results_df$loglossmean),]
-
-cat("\n--- Best Model Settings (Based on CV Logloss) ---\n")
-print(best_model_settings)
-cat("--------------------------\n")
+train_filtered$HDI_Category <- factor(train_filtered$HDI_Category, levels = long, 
+                                      labels = short, ordered=TRUE)
+test_filtered$HDI_Category  <- factor(test_filtered$HDI_Category,  levels = long, 
+                                      labels = short, ordered=TRUE)
 
 set.seed(123)
 
-# Final Model with best settings
-params_final <- list(
-  booster = "gbtree",
-  objective = "multi:softprob",
-  num_class = num_class,
-  eta = best_model_settings$eta,
-  max_depth = best_model_settings$max_depth,
-  subsample = best_model_settings$subsample,
-  colsample_bytree = 0.8,
-  nthread = 1
-)
+# Recipe: category ~ InternetUsersPct
+myrecipe <- recipe(HDI_Category ~ InternetUsersPct, data = train_filtered)
 
-final_xgb_model <- xgboost(
-  params = params_final,
-  data = train_matrix,
-  label = train_target,
-  nrounds = best_model_settings$best_iteration, 
-  verbose = 1
-)
+# Model: multinomial logistic regression
+mymodel <- multinom_reg() %>% 
+  set_engine("nnet") %>% 
+  set_mode("classification")
 
+myworkflow <- workflow() %>% 
+  add_recipe(myrecipe) %>% 
+  add_model(mymodel)
 
-# Make predictions on the test data with the final model
+fitted_model <- fit(myworkflow, data = train_filtered)
 
-predictions_final <- predict(final_xgb_model, newdata = test_matrix)
-predictions_class_final <- matrix(predictions_final, ncol = num_class, byrow = TRUE) %>%
-  apply(1, which.max) - 1
+# Predictions (class + probabilities)
+predictions <- augment(fitted_model, new_data = test_filtered)
 
-# Calculate the Accuracy
-
-final_accuracy <- sum(predictions_class_final == test_target) / length(test_target)
-cat("\nFinal XGBoost Accuracy on Test Data:", final_accuracy, "\n")
+# Metric: accuracy (simple, minimal change)
+accuracy(predictions, truth = HDI_Category, estimate = .pred_class)
 
 # Visualize model performance
 
-confusion_matrix <- table(Actual = test_target, Predicted = predictions_class_final)
+confusion_matrix <- table(Actual = predictions$HDI_Category, 
+                          Predicted = predictions$.pred_class)
 print("Confusion Matrix:")
 print(confusion_matrix)
-
-importance_matrix <- xgb.importance(feature_names = colnames(train_matrix), model = final_xgb_model)
-xgb.plot.importance(importance_matrix, top_n = 10)
-
-cat("\nSummary of Feature Importance Matrix:\n")
-print(importance_matrix)
-
-saveRDS(importance_matrix, file = "xgboost_importance_matrix.rds")
-
-##########################################################################
-
-# XGBoost InternetUserPct Regression
-
-
-# Create a List of columns to evaluate
-
-model_columns2 <- c(
-  "CountryCode", "HDI_Index", "FoodIndex", "ElectricAccess", "PopDensity", 
-  "PopInSlums", "WaterStress", "InternetUsersPct", "GDPPerCapGrowth", "GDPGrowth",
-  "GDP", "PoliticalStability", "RqdEduYears", "GovtEduSpendPctGDP",
-  "UHCServiceCoverage", "RuralPopulGrowth", "VoiceAccountability"
-)
-
-# Filter the training and test data to include only the specified columns
-
-train_filtered2 <- train_data %>% select(all_of(model_columns2))
-test_filtered2 <- test_data %>% select(all_of(model_columns2))
-
-# Use na.omit() to remove rows with any NA values 
-
-train_filtered2 <- na.omit(train_filtered2)
-test_filtered2 <- na.omit(test_filtered2)
-
-# Keep a country code vector from training data (for constructing folds)
-train_ids2 <- train_filtered2$CountryCode   # same row order as train_matrix / dtrain
-
-# Remove the country code from the predictor data frames
-train_predictors2 <- train_filtered2 %>% select(-CountryCode)
-test_predictors2 <- test_filtered2 %>% select(-CountryCode)
-
-train_target2 <- train_filtered2$HDI_Index
-test_target2 <- test_filtered2$HDI_Index
-
-# Remove the target variable from the predictor data frames
-train_predictors2 <- train_predictors2 %>% select(-HDI_Index)
-test_predictors2 <- test_predictors2 %>% select(-HDI_Index)
-
-# Combine the predictor data frames to create a sparse matrix that has the same
-# columns and column order for both training and test data.
-
-combined_predictors2 <- bind_rows(train_predictors2, test_predictors2)
-
-# Convert all factor/character columns to a sparse matrix for XGBoost
-
-combined_matrix2 <- sparse.model.matrix(~ . -1, data = combined_predictors2)
-
-
-# Split the combined matrix back into training and test matrices
-
-train_matrix2 <- combined_matrix2[1:nrow(train_predictors2),]
-test_matrix2 <- combined_matrix2[(nrow(train_predictors2)+1):nrow(combined_matrix2),]
-
-# Train XGBoost Model with hyperparameter Tuning and cross-validation 
-
-dtrain2 <- xgb.DMatrix(data = train_matrix2, label = train_target2)
-dtest2 <- xgb.DMatrix(data = test_matrix2, label = test_target2)
-
-# Define a grid of hyperparameters to search over
-
-hyper_grid2 <- expand.grid(
-  eta = c(0.01, 0.1, 0.3),
-  max_depth = c(6, 12, 18),
-  subsample = c(0.6, 0.8, 1.0) 
-)
-
-# Create an empty list to store the results
-
-results_list2 <- list()
-
-# We are going to Iterate over each combination of hyperparameters.  The model uses
-# k fold cross-validation - Because this is temporal data and so observations for a
-# given country are autocorrelated, we need to make sure that whole countries are 
-# contained within folds, much as we did with the test/training split.
-#
-# We also use the same folds for each iteration so that when selecting the best set of
-# hyperparameters we are comparing apples to apples
-
-# Create the folds by country
-k <- 5 
-set.seed(123)
-countries2 <- unique(train_ids2)
-fold_id2 <- sample(rep(1:k, length.out = length(countries2)))
-folds2 <- lapply(1:k, function(j) which(train_ids2 %in% countries2[fold_id2 == j]))
-
-# Run and evaluate model for each set of hyperparameters
-for (i in 1:nrow(hyper_grid2)) {
-  current_eta <- hyper_grid2$eta[i]
-  current_max_depth <- hyper_grid2$max_depth[i]
-  current_subsample <- hyper_grid2$subsample[i]
-  set.seed(123)
-  params <- list(
-    booster = "gbtree",
-    objective = "reg:squarederror",
-    eta = current_eta,
-    max_depth = current_max_depth,
-    subsample = current_subsample,
-    colsample_bytree = 0.8,
-    nthread = 1
-  )
-  
-  # We use xgb.cv for hyperparameter tuning.     
-  
-  cv_model <- xgb.cv(
-    params = params,
-    data = dtrain2,
-    nrounds = 3000,
-    folds = folds2,
-    metrics = "rmse",
-    early_stopping_rounds = 10,
-    verbose = 0
-  )
-  
-  # Get the best cross-validation accuracy
-  
-  best_iteration <- cv_model$best_iteration
-  cv_rmse_mean <- cv_model$evaluation_log[best_iteration,]$test_rmse_mean
-  roundsrun <- nrow(cv_model$evaluation_log)
-  
-  # Store the results
-  
-  results_list2[[i]] <- list(
-    eta = current_eta,
-    max_depth = current_max_depth,
-    roundsrun = roundsrun,
-    subsample = current_subsample,
-    rmse = cv_rmse_mean,
-    best_iteration = best_iteration
-  )
-  
-  cat(paste0("Model ", i, " of ",nrow(hyper_grid2),
-             ", Settings: eta=", current_eta, 
-             ", max_depth=", current_max_depth,
-             ", subsample=", current_subsample,
-             ", Rounds Run=", roundsrun,
-             " | CV RMSE =", round(cv_rmse_mean, 4), 
-             " (Best Iteration: ", best_iteration, ")\n"))
-  
-}  #Closes For Loop
-
-# Summarize results
-results_df2 <- do.call(rbind, lapply(results_list2, as.data.frame))
-best_model_settings2 <- results_df2[which.min(results_df2$rmse),]
-
-cat("\n--- Best Model Settings (Based on CV Logloss) ---\n")
-print(best_model_settings2)
-cat("--------------------------\n")
-
-set.seed(123)
-# Final Model with best settings
-params_final2 <- list(
-  booster = "gbtree",
-  objective = "reg:squarederror",
-  eta = best_model_settings2$eta,
-  max_depth = best_model_settings2$max_depth,
-  subsample = best_model_settings2$subsample,
-  colsample_bytree = 0.8,
-  nthread = 1,
-  eval_metric = "rmse"
-)
-
-final_xgb_model2 <- xgboost(
-  params = params_final2,
-  data = train_matrix2,
-  label = train_target2,
-  nrounds = best_model_settings2$best_iteration, 
-  verbose = 1
-)
-
-# Make predictions on the test data
-predictions2 <- predict(final_xgb_model2, newdata = dtest2)
-
-# Calculate the Mean Absolute Error to evaluate the model's performance
-mean_absolute_error2 <- mean(abs(test_target2 - predictions2))
-cat("Mean Absolute Error:", mean_absolute_error2, "\n")
-
-# Visualize Feature Importance 
-
-importance_matrix2 <- xgb.importance(feature_names = colnames(dtrain2), 
-                                     model = final_xgb_model2)
-
-# Plot the top 10 most important features
-xgb.plot.importance(importance_matrix2, top_n = 10)
-
-# Get feature importance from the model
-importance_matrix2 <- xgb.importance(feature_names = colnames(dtrain2), 
-                                     model = final_xgb_model2)
-
-
-# Create a data frame for plotting predictions vs. actuals
-results2 <- data.frame(Actual = test_target2, Predicted = predictions2)
-
-# Create a scatter plot of Actual vs. Predicted values
-xg_scatter2 <- ggplot(results2, aes(x = Actual, y = Predicted)) +
-  geom_point(alpha = 0.6) +
-  geom_abline(intercept = 0, slope = 1, color = "red", 
-              linetype = "dashed", linewidth = 1) +
-  labs(
-    title = "Actual vs. Predicted Values",
-    x = "Actual Internet Users Percentage",
-    y = "Predicted Internet Users Percentage"
-  ) +
-  theme_minimal()
-
-print(xg_scatter2)
-
-# Create a residual plot
-results2$Residuals <- results2$Actual - results2$Predicted
-xg_resid2 <- ggplot(results2, aes(x = Residuals)) +
-  geom_histogram(bins = 30, fill = "lightblue", color = "black") +
-  geom_vline(xintercept = 0, color = "red", linetype = "dashed", linewidth = 1) +
-  labs(
-    title = "Residuals Distribution",
-    x = "Residuals (Actual - Predicted)",
-    y = "Count"
-  ) +
-  theme_minimal()
-
-print(xg_resid2)
-
-
-
 
