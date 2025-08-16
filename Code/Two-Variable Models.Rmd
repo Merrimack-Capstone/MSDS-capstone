@@ -1,3 +1,16 @@
+---
+title: "Two-Variable Models"
+author: "Ray Chandonnet and Barrett Viator"
+date: "2025-08-13"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r code, results='asis'}
 # Import Libraries 
 
 library(tidyverse)
@@ -61,6 +74,7 @@ print_regressions <- function(predictions, change = FALSE){
     ) +
     theme_minimal()
   print(p_scatter)
+  cat('\\newline')
   
   # Residuals histogram
   results_lm$Residuals <- results_lm$Actual - results_lm$Predicted
@@ -297,8 +311,8 @@ metrics <- metric_set(rmse, mae, rsq)
 print(metrics(predictions, truth = HDI_Index, estimate = .pred))
 
 # (optional) coefficients + summary
-tidy(extract_fit_parsnip(fitted_model))
-glance(extract_fit_parsnip(fitted_model))
+print(tidy(extract_fit_parsnip(fitted_model)))
+print(glance(extract_fit_parsnip(fitted_model)))
 
 print_regressions(predictions,change = FALSE)
 
@@ -313,3 +327,5 @@ ggplot(train_filtered, aes(x = Cumulative3yrChg_InternetUsersPct, y = HDI_Index)
     y = "Yearly Change in HDI"
   ) +
   theme_minimal()
+```
+

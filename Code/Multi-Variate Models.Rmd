@@ -1,3 +1,16 @@
+---
+title: "Multi-Variate Models"
+author: "Ray Chandonnet and Barrett Viator"
+date: "2025-08-13"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r code}
 # Import Libraries 
 
 library(tidyverse)
@@ -462,3 +475,5 @@ xg_resid2 <- ggplot(results2, aes(x = Residuals)) +
   theme_minimal()
 
 print(xg_resid2)
+```
+
