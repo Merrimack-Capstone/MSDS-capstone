@@ -97,9 +97,6 @@ test_filtered <- test_data %>% dplyr::select(all_of(model_columns))
 train_filtered <- na.omit(train_filtered)
 test_filtered <- na.omit(test_filtered)
 
-# libs
-
-
 set.seed(123)
 
 myrecipe <- recipe(HDI_Index ~ InternetUsersPct, data = train_filtered)
@@ -161,15 +158,6 @@ model_columns <- c("HDI_Category", "InternetUsersPct")
 
 train_filtered <- train_data %>% dplyr::select(all_of(model_columns)) %>% drop_na()
 test_filtered  <- test_data  %>% dplyr::select(all_of(model_columns)) %>% drop_na()
-
-long <- c("Low human development","Medium human development",
-          "High human development","Very high human development")
-short <- c("Low","Medium","High","Very High")
-
-train_filtered$HDI_Category <- factor(train_filtered$HDI_Category, levels = long, 
-                                      labels = short, ordered=TRUE)
-test_filtered$HDI_Category  <- factor(test_filtered$HDI_Category,  levels = long, 
-                                      labels = short, ordered=TRUE)
 
 set.seed(123)
 
@@ -264,7 +252,7 @@ ggplot(train_filtered, aes(x = YearlyChgInternet, y = YearlyChgHDI)) +
 # How about incorporating a 3 year lag
 #
 model_columns <- c(
-  "HDI_Index", "Cumulative3yrChg_InternetUsersPct"
+  "HDI_Index", "Cumulative3yrChg_InternetUsersPct", "Cumulative3yrChg_HDI"
 )
 
 # Filter the training and test data to include only the specified columns
@@ -302,14 +290,47 @@ glance(extract_fit_parsnip(fitted_model))
 
 print_regressions(predictions,change = FALSE)
 
-library(ggplot2)
-
 ggplot(train_filtered, aes(x = Cumulative3yrChg_InternetUsersPct, y = HDI_Index)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE)+
   labs(
-    title = "Yearly Change: Internet Access vs HDI",
-    x = "Yearly Change in Internet Access (%)",
-    y = "Yearly Change in HDI"
+    title = "3 Year Change in nternet Access vs HDI",
+    x = "3 Year Change in Internet Access (%)",
+    y = "HDI Index"
+  ) +
+  theme_minimal()
+
+set.seed(123)
+
+myrecipe <- recipe(Cumulative3yrChg_HDI ~ Cumulative3yrChg_InternetUsersPct, data = train_filtered)
+
+mymodel <- linear_reg() %>% 
+  set_engine("lm")
+
+myworkflow <- workflow() %>% 
+  add_recipe(myrecipe) %>% 
+  add_model(mymodel)
+
+fitted_model <- fit(myworkflow, data = train_filtered)
+
+predictions <- predict(fitted_model, new_data = test_filtered) %>% 
+  bind_cols(test_filtered)
+
+metrics <- metric_set(rmse, mae, rsq)
+print(metrics(predictions, truth = Cumulative3yrChg_HDI, estimate = .pred))
+
+# (optional) coefficients + summary
+tidy(extract_fit_parsnip(fitted_model))
+glance(extract_fit_parsnip(fitted_model))
+
+print_regressions(predictions,change = FALSE)
+
+ggplot(train_filtered, aes(x = Cumulative3yrChg_InternetUsersPct, y = Cumulative3yrChg_HDI)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)+
+  labs(
+    title = "3 Year Change: Internet Access vs HDI",
+    x = "3 Year Change in Internet Access (%)",
+    y = "3 Year Change in HDI Index"
   ) +
   theme_minimal()

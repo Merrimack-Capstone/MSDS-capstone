@@ -64,16 +64,10 @@ train_ids <- train_filtered$CountryCode   # same row order as train_matrix / dtr
 train_predictors <- train_filtered %>% dplyr::select(-CountryCode)
 test_predictors <- test_filtered %>% dplyr::select(-CountryCode)
 
-# For classification, the target variable must be a numeric integer
-HDI_levels <- c(
-  "Low human development",
-  "Medium human development",
-  "High human development",
-  "Very high human development"
-)
+# For classification, the target variable must be an integer starting at 0
 
-train_target <- as.integer(factor(train_filtered$HDI_Category, levels = HDI_levels)) - 1
-test_target <- as.integer(factor(test_filtered$HDI_Category, levels = HDI_levels)) - 1
+train_target <- as.integer(train_filtered$HDI_Category) - 1
+test_target <- as.integer(test_filtered$HDI_Category) - 1
 num_class <- length(unique(train_target))
 
 # Remove the target variable from the predictor data frames
@@ -155,7 +149,7 @@ for (i in 1:nrow(hyper_grid)) {
     data = dtrain,
     nrounds = 3000,
     folds = folds,
-    metrics = "mlogloss",
+    metrics = c("mlogloss", "merror"),
     early_stopping_rounds = 10,
     verbose = 0
   )
@@ -164,6 +158,7 @@ for (i in 1:nrow(hyper_grid)) {
   
   best_iteration <- cv_model$best_iteration
   cv_loglossmean <- cv_model$evaluation_log[best_iteration,]$test_mlogloss_mean
+  cv_acc <- 1 - cv_model$evaluation_log[best_iteration, ]$test_merror_mean
   roundsrun <- nrow(cv_model$evaluation_log)
   
 # Store the results
@@ -174,6 +169,7 @@ for (i in 1:nrow(hyper_grid)) {
     roundsrun = roundsrun,
     subsample = current_subsample,
     loglossmean = cv_loglossmean,
+    accuracy = cv_acc,
     best_iteration = best_iteration
   )
   
@@ -209,6 +205,27 @@ params_final <- list(
   nthread = 1
 )
 
+output_df <- results_df %>%
+  mutate(run_id = row_number()) %>%          # preserve original run order
+  arrange(loglossmean) %>%                   # sort by loglossmean ascending
+  kable(format = "markdown", digits = 4) %>% # nicely formatted table
+  kable_styling(full_width = FALSE)
+print(output_df)
+
+ggplot(results_df, aes(x = loglossmean)) +
+  geom_histogram(binwidth = 0.01, fill = "skyblue", color = "black") +
+  labs(
+    title = "Distribution of Log Loss Mean",
+    x = "Log Loss Mean",
+    y = "Count"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text = element_text(size = 20),
+    axis.title = element_text(size = 24),
+    plot.title = element_text(size = 30, face = "bold")
+  )
+
 final_xgb_model <- xgboost(
   params = params_final,
   data = train_matrix,
@@ -217,6 +234,8 @@ final_xgb_model <- xgboost(
   verbose = 1
 )
 
+cat("\nAverage In-Folds Accuracy during Cross Validation", 
+    best_model_settings$accuracy, "\n")
 
 # Make predictions on the test data with the final model
 
@@ -313,6 +332,14 @@ hyper_grid2 <- expand.grid(
 
 results_list2 <- list()
 
+# Create the folds
+
+k <- 5 
+set.seed(123)
+countries2 <- unique(train_ids2)
+fold_id2 <- sample(rep(1:k, length.out = length(countries2)))
+folds2 <- lapply(1:k, function(j) which(train_ids2 %in% countries2[fold_id2 == j]))
+
 # We are going to Iterate over each combination of hyperparameters.  The model uses
 # k fold cross-validation - Because this is temporal data and so observations for a
 # given country are autocorrelated, we need to make sure that whole countries are 
@@ -320,13 +347,6 @@ results_list2 <- list()
 #
 # We also use the same folds for each iteration so that when selecting the best set of
 # hyperparameters we are comparing apples to apples
-
-# Create the folds by country
-k <- 5 
-set.seed(123)
-countries2 <- unique(train_ids2)
-fold_id2 <- sample(rep(1:k, length.out = length(countries2)))
-folds2 <- lapply(1:k, function(j) which(train_ids2 %in% countries2[fold_id2 == j]))
 
 # Run and evaluate model for each set of hyperparameters
 for (i in 1:nrow(hyper_grid2)) {
@@ -351,7 +371,7 @@ for (i in 1:nrow(hyper_grid2)) {
     data = dtrain2,
     nrounds = 3000,
     folds = folds2,
-    metrics = "rmse",
+    metrics = c("rmse","mae"),
     early_stopping_rounds = 10,
     verbose = 0
   )
@@ -360,6 +380,7 @@ for (i in 1:nrow(hyper_grid2)) {
   
   best_iteration <- cv_model$best_iteration
   cv_rmse_mean <- cv_model$evaluation_log[best_iteration,]$test_rmse_mean
+  cv_mae_mean <- cv_model$evaluation_log[best_iteration,]$test_mae_mean
   roundsrun <- nrow(cv_model$evaluation_log)
   
   # Store the results
@@ -370,6 +391,7 @@ for (i in 1:nrow(hyper_grid2)) {
     roundsrun = roundsrun,
     subsample = current_subsample,
     rmse = cv_rmse_mean,
+    mae = cv_mae_mean,
     best_iteration = best_iteration
   )
   
@@ -391,6 +413,27 @@ cat("\n--- Best Model Settings (Based on CV Logloss) ---\n")
 print(best_model_settings2)
 cat("--------------------------\n")
 
+output2_df <- results_df2 %>%
+  mutate(run_id = row_number()) %>%          # preserve original run order
+  arrange(rmse) %>%                   # sort by rmse ascending
+  kable(format = "markdown", digits = 4) %>% # nicely formatted table
+  kable_styling(full_width = FALSE)
+print(output2_df)
+
+ggplot(results_df2, aes(x = rmse)) +
+  geom_histogram(binwidth = 0.002, fill = "skyblue", color = "black") +
+  labs(
+    title = "Distribution of RMSE",
+    x = "RMSE",
+    y = "Count"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text = element_text(size = 20),
+    axis.title = element_text(size = 24),
+    plot.title = element_text(size = 30, face = "bold")
+  )
+
 set.seed(123)
 # Final Model with best settings
 params_final2 <- list(
@@ -401,7 +444,7 @@ params_final2 <- list(
   subsample = best_model_settings2$subsample,
   colsample_bytree = 0.8,
   nthread = 1,
-  eval_metric = "rmse"
+  eval_metrics = c("rmse","mae")
 )
 
 final_xgb_model2 <- xgboost(
@@ -462,3 +505,7 @@ xg_resid2 <- ggplot(results2, aes(x = Residuals)) +
   theme_minimal()
 
 print(xg_resid2)
+
+##########################################################################
+#
+# We run this again

@@ -43,7 +43,7 @@ wait_to_render <- function(seconds){
 OneCountryMissingness <- function(data, code) {
   
   data <- data %>%
-    select(-Lag1_InternetUsersPct,
+    dplyr::select(-Lag1_InternetUsersPct,
            -Lag2_InternetUsersPct,
            -Lag1_YearlyChgInternet,
            -Lag2_YearlyChgInternet,
@@ -53,7 +53,7 @@ OneCountryMissingness <- function(data, code) {
   
   missing_heatmap_data <- data %>%
     filter(CountryCode == code) %>%
-    select(-CountryCode, -CountryName, -IncomeGroup, -HDI_Category) %>%
+    dplyr::select(-CountryCode, -CountryName, -IncomeGroup, -HDI_Category) %>%
     pivot_longer(cols = -year, names_to = "variable", values_to = "value") %>%
     mutate(Status = ifelse(is.na(value), "Missing", "Present"))
   
@@ -88,7 +88,7 @@ OneCountryMissingness <- function(data, code) {
 
 OverallMissingnessHeatmap <- function(data) {
   data <- data %>%
-    select(-Lag1_InternetUsersPct,
+    dplyr::select(-Lag1_InternetUsersPct,
            -Lag2_InternetUsersPct,
            -Lag1_YearlyChgInternet,
            -Lag2_YearlyChgInternet,
@@ -127,7 +127,7 @@ OverallMissingnessHeatmap <- function(data) {
 
 MissingnessByVariable <- function(data) {
    PlotData <- data %>%
-    select(-Lag1_InternetUsersPct,
+    dplyr::select(-Lag1_InternetUsersPct,
            -Lag2_InternetUsersPct,
            -Lag1_YearlyChgInternet,
            -Lag2_YearlyChgInternet,
@@ -161,7 +161,7 @@ MissingnessByVariable <- function(data) {
 # Missingness chart by year
 MissingnessByYear <- function(data) {
   PlotData <- data %>%
-    select(-Lag1_InternetUsersPct,
+    dplyr::select(-Lag1_InternetUsersPct,
            -Lag2_InternetUsersPct,
            -Lag1_YearlyChgInternet,
            -Lag2_YearlyChgInternet,
@@ -198,7 +198,7 @@ MissingnessByYear <- function(data) {
 
 MissingnessByCountry <- function(data, threshold) {
   PlotData <- data %>%
-    select(-Lag1_InternetUsersPct,
+    dplyr::select(-Lag1_InternetUsersPct,
            -Lag2_InternetUsersPct,
            -Lag1_YearlyChgInternet,
            -Lag2_YearlyChgInternet,
@@ -309,12 +309,9 @@ Yeo_Johnson <- function(train_data, test_data) {
   
   # Get affected columns from training data
   affected_cols <- train_data %>%
-    select(InternetUsersPct, 
+    dplyr::select(InternetUsersPct, 
            Lag1_InternetUsersPct, 
-           Lag2_InternetUsersPct,
-           YearlyChgInternet, 
-           Lag1_YearlyChgInternet,
-           Lag2_YearlyChgInternet) %>%
+           Lag2_InternetUsersPct) %>%
     names()
   
   # Preprocessing recipe - fit only on training data
@@ -426,7 +423,7 @@ impute_time_trend <- function(data, var_name, floor, cap) {
 # In the first models we will just use InternetUsersPct or its derivatives
 
 PreProcessingData <- PreProcessingData |>
-  select(-IHDI_Index, -GiniCoeff, -FixedIntSubs)
+  dplyr::select(-IHDI_Index, -GiniCoeff, -FixedIntSubs)
 
 # Rename the Income Group column to remove the space - just good naming convention
 PreProcessingData <- PreProcessingData |>
@@ -460,7 +457,8 @@ PreProcessingData <- PreProcessingData |>
     Lag1_YearlyChgInternet = lag(YearlyChgInternet, 1),
     Lag2_YearlyChgInternet = lag(YearlyChgInternet, 2),
     
-    Cumulative3yrChg_InternetUsersPct = InternetUsersPct - lag(InternetUsersPct, 3)
+    Cumulative3yrChg_InternetUsersPct = InternetUsersPct - lag(InternetUsersPct, 3),
+    Cumulative3yrChg_HDI = HDI_Index - lag(HDI_Index, 3)
   ) |>
   ungroup()
 
@@ -468,12 +466,23 @@ PreProcessingData <- PreProcessingData |>
 PreProcessingData <- PreProcessingData %>%
   mutate(
     HDI_Category = case_when(
-      HDI_Index >= 0.800 ~ "Very high human development",
-      HDI_Index >= 0.700 &HDI_Index <= 0.799 ~ "High human development",
-      HDI_Index >= 0.550 & HDI_Index <= 0.699 ~ "Medium human development",
-      TRUE ~ "Low human development"
+      HDI_Index >= 0.800 ~ "Very high",
+      HDI_Index >= 0.700 & HDI_Index <= 0.799 ~ "High",
+      HDI_Index >= 0.550 & HDI_Index <= 0.699 ~ "Medium",
+      TRUE ~ "Low"
+    ),
+    HDI_Category = factor(
+      HDI_Category,
+      levels = c(
+        "Low",
+        "Medium",
+        "High",
+        "Very high"
+      ),
+      ordered = TRUE
     )
   )
+
 
 # move the position of the new classified HDI data to a more relevant spot
 PreProcessingData <- PreProcessingData%>%
@@ -492,7 +501,7 @@ PreProcessingData <- PreProcessingData %>%
                                 na.rm = TRUE))
 
 PreProcessingData <- PreProcessingData %>%
-  select(-GovtEffectiveness,
+  dplyr::select(-GovtEffectiveness,
          -RuleOfLaw,
          -CorruptionScore,
          -HealthSpendPerCapita,
@@ -534,7 +543,7 @@ MissingnessByVariable(PreProcessingData)
 # pattern to the missingness
 
 PreProcessingData <- PreProcessingData %>%
-  select(-MortalityFromDirtyness,
+  dplyr::select(-MortalityFromDirtyness,
          -BankingAccess,
          -MigrantsPct,
          -FoodInsecurityPct,
@@ -597,7 +606,7 @@ PreProcessingData <- PreProcessingData %>%
       UHCServiceCoverage
     )
   ) %>%
-  select(-prev_val, -next_val) %>%
+  dplyr::select(-prev_val, -next_val) %>%
   ungroup()
 
 # plot the curve again to make sure it did it right
@@ -663,7 +672,7 @@ FourPlots(PreProcessingData, 10)
 # Now we interpolate the missing 2001 VoiceAccountability, PoliticalStability 
 # and GovernanceScore data
 PreProcessingData %>%
-  select(VoiceAccountability, PoliticalStability, GovernanceScore) %>%
+  dplyr::select(VoiceAccountability, PoliticalStability, GovernanceScore) %>%
   pivot_longer(everything(), names_to = "Variable", values_to = "Value") %>%
   group_by(Variable) %>%
   summarize(
@@ -676,10 +685,10 @@ PreProcessingData %>%
   arrange(Variable) %>%
   kable(digits = 3)
 
-# Filter to years 2000–2003 and select the variables of interest
+# Filter to years 2000–2003 and dplyr::select the variables of interest
 PreProcessingData %>%
   filter(year %in% 2000:2003) %>%
-  select(CountryCode, year, 
+  dplyr::select(CountryCode, year, 
          VoiceAccountability, PoliticalStability, GovernanceScore) %>%
   pivot_longer(cols = -c(CountryCode, year), names_to = "Variable", values_to = "Value") %>%
   group_by(year, Variable) %>%
@@ -706,7 +715,7 @@ gov_vars <- c("VoiceAccountability", "PoliticalStability", "GovernanceScore")
 
 delta_check <- PreProcessingData %>%
   filter(year %in% c(2000, 2002, 2003)) %>%
-  select(CountryCode, year, all_of(gov_vars)) %>%
+  dplyr::select(CountryCode, year, all_of(gov_vars)) %>%
   pivot_longer(cols = -c(CountryCode, year), names_to = "Variable", values_to = "Value") %>%
   pivot_wider(names_from = year, values_from = Value, names_prefix = "year_") %>%
   filter(!is.na(year_2000) & !is.na(year_2002) & !is.na(year_2003)) %>%
@@ -744,7 +753,7 @@ PreProcessingData <- PreProcessingData %>%
       if (any(g$year == 2001) && is.na(g[[v]][g$year == 2001])) {
         # gather supporting points
         pts <- g %>% filter(year %in% c(2000, 2002, 2003)) %>%
-          select(year, !!rlang::sym(v)) %>% stats::na.omit()
+          dplyr::select(year, !!rlang::sym(v)) %>% stats::na.omit()
         
         if (nrow(pts) >= 3) {
           # quadratic fit through 2000, 2002, 2003
@@ -1013,8 +1022,9 @@ test_data  <- YJ_result$test
 # to both training and test data
 # PCA Recipe
 numeric_cols_for_pca <- train_data %>%
-  select(where(is.numeric), -year, 
+  dplyr::select(where(is.numeric), -year, 
          -HDI_Index,
+         -InternetUsersPct,
          -Lag1_InternetUsersPct, 
          -Lag2_InternetUsersPct, 
          -Cumulative3yrChg_InternetUsersPct,
@@ -1071,12 +1081,6 @@ print("\nLoadings for each principal component:")
 print(pca_loadings_long)
 
 # PCA Biplot for HDI Category
-PCAData_train$HDI_Category <- factor(
-  PCAData_train$HDI_Category,
-  levels = c("Very high human development", "High human development",
-             "Medium human development","Low human development")
-)
-
 pca_biplot <- ggplot(PCAData_train, aes(x = PC1, y = PC2)) +
   
   geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
@@ -1137,4 +1141,7 @@ saveRDS(train_data, file = here::here("Data", "train_data.rds"))
 saveRDS(test_data, file = here::here("Data", "test_data.rds"))
 saveRDS(PCAData_test, file = here::here("Data", "PCAData_test.rds"))
 saveRDS(PCAData_train, file = here::here("Data", "PCAData_train.rds"))
-
+write_xlsx(test_data, path = here::here("Data","test_data.xlsx"))
+write_xlsx(train_data, path = here::here("Data", "train_data.xlsx"))
+write_xlsx(PCAData_test, path = here::here("Data","PCAdata_test.xlsx"))
+write_xlsx(PCAData_train, path = here::here("Data","PCAdata_train.xlsx"))
