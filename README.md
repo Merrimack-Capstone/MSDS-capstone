@@ -1,36 +1,11 @@
-# Working Project Title
+# Project Title
 Bridging the Digital Divide for the Next Billion Users: Can we predicting changes in overall wellbeing and national economic health based on digital inclusion?Will Bridging The Digital Divide Bring Prosperity To The Second “Next Billion 
 Users” And Their Home Countries?
 
-## Background
-The Rural Electrification Act (REA) of 1936, a cornerstone of President Roosevelt's "New Deal," successfully brought electricity and infrastructure to underserved areas of the United States. This strategic investment  proved to be a “powerful economic springboard, propelling America to its post-war economic dominance” (Taylor, 2024). This historical success offers a compelling parallel to the current global challenge and opportunity presented by the expansion of internet connectivity and digital technologies, particularly in addressing long-standing disparities in economic participation, well-being, and education worldwide.
-
-Today, the "digital divide" extends beyond basic internet access, encompassing disparities in "Advanced Meaningful Connectivity” which is defined as daily access via mobile devices with unlimited data and at least 4G speeds (A4AI, 2022) . For many in the Global South, the prohibitive cost of an entry-level mobile device which often exceeds 30% of monthly income perpetuates "adverse digital incorporation," limiting access to vital information, education, and economic opportunities (GDIP, 2022., Heeks, 2022) . The COVID-19 pandemic highlighted the transformative potential of increased digital access, enabling individuals to gain health knowledge, stay safe, and acquire crucial skills for civic engagement and economic participation (Kloza, 2023).
-
-The multifaceted challenges faced by those who live with “adverse digital incorporation” are heightened by factors like insufficient education, low digital literacy, and unreliable infrastructure. Initiatives from organizations like Google's "Next Billion Users," IEEE, and A4AI, are crucial to bringing these individuals into more modern economies. These efforts emphasize user research in low and middle-income countries to develop inclusive digital tools that accommodate limitations like older devices and high data costs. Ultimately, fostering widespread, affordable internet access is not just about market expansion. Doing so is a humanitarian initiative that can dismantle barriers, improve individual well-being, and drive socio-economic development on a global scale.
-
-The initial phase of our analysis focused on intensive exploratory data analysis to ensure the quality and suitability of the raw datasets. Moving forward we will proceed with the handling of missing values, reducing dimensionality via PCA, and addressing multicolinearity through VIF. Outlier detection and treatment are also crucial to the success of our modeling efforts. Utilizing the interquartile range (IQR) to identify and cap extreme values in key numerical columns will mitigate their disproportionate influence on model performance. Data types will need to be assessed to convert to appropriate formats for modeling which will ensure consistent handling of numerical and categorical data throughout the following modeling stages.
-
-Feature engineering will then be systematically applied to enhance the predictive power of our dataset by transforming existing variables and creating new binned ones to provide deeper insights into the various related columns and to reduce noise that may impact model performance. 
-
-In order to prepare the features for machine learning models, scaling and encoding techniques will be applied. Numerical features often appear with varying scales will undergo standardization using StandardScaler to ensure that no single feature dominates the machine learning process. One-hot encoding will be utilized for nominal categorical variables that do not exhibit an inherent order by creating columns for each unique category and preventing unintended ordinal relationships.
-
-This comprehensive pre-processing and feature engineering pipeline ensures that the data is properly cleaned and well-structured for predictive modeling and other machine learning algorithms. This creates a stronger foundation for the subsequent model training and evaluation phases to test our hypothesis and to compare the relationship of the results to our predictions.
+## Abstract
+History has shown that disadvantaged populations experience improved wellbeing when infrastructure improvements impact their lives.   A diverse set of stakeholders, including governments, aid organizations and private sector technology companies,  would benefit from being able to quantify (at minimum) and predict (ideally) the extent to which expanded access to the internet is one such infrastructure improvement that leads directly to higher population wellbeing.   This report describes in depth the application of statistical and machine-learning based predictive analytics to both correlate and isolate causal links between access to the internet and population wellbeing.   Using 30 years worth of data, consisting of a subset of raw, transformed and abstracted data vectors from the World Bank (for inputs that could influence wellbeing),  and the United Nations (for the Human Development Index chosen as the basis for measuring wellbeing), this study demonstrates that the correlation between internet access and population wellbeing is positive and statistically relevant.  This study also demonstrates that, while it is challenging to firmly quantify a causal relationship between internet access and wellbeing, well-performing broader models that predict wellbeing rely on internet access as an important positive factor in predicted wellbeing.  Finally,this study shows that investing in broadening access to (ideally, renewable) electricity in developing countries is arguably the MOST important factor influencing wellbeing, as well as a necessary precursor to broadening internet access as a wellbeing growth accelerant.   These findings can serve as support for prescriptive strategy for both private and public sector entities.  Furthermore, because the data acquisition modules and predictive models that are the backbone of this study are built on public data and can be updated dynamically as new data becomes available, entities relying on these models to support their strategy can update the results regularly and make interpretative course-corrections as indicated.
 
 
-## Research question
-We are posing the following research question:  To what extent has growth in internet access of populations influenced population wellbeing in more developed nations, and can that be used to predict improvements in wellbeing and economic progress among global minority populations (the "next billion users")? 
 
-
-## Hypothesis & Predictions
-
-Hypothesis 
-
-Increased access to the internet in the developing world is a measurably material contributing factor to improved population wellbeing - so much so that we may be able to predict how much wellbeing will improve based on increased digital inclusion.  
-
-
-Prediction
-
-We expect that digital inclusion will be strongly correlated to education, which is a component of wellbeing, and moderately correlated with overall wellbeing.  We expect that PREDICTING the rate of improvement in wellbeing based on internet inclusion alone will be extremely challenging due to the number of other factors influencing wellbeing, but hope to be able to isolate its impact on wellbeing.  We expect that clustering may help lead to better predictive performance, if we have time to get to it.
 
 
