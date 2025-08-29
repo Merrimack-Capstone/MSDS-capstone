@@ -14,16 +14,84 @@ History has shown that disadvantaged populations experience improved wellbeing w
 #### IMPORTANT:  Setting Up relative file references
 Most of the R modules import / export data to/from the /Data folder using the here:here()function.   Before opening any code models, you must open the R project named "MSDS-capstone.Rproj" found in the root folder of the Github repository.   This will ensure that \Data is referenced off the Github root and not the user's local machine.
 
+#### Dependendencies
+
+The R modules below use some or all of the following packages:
+
+broom
+corrplot
+dplyr
+ggcorrplot
+ggplot2
+ggpmisc
+here
+kableExtra
+knitr
+MASS
+Matrix
+parsnip
+plm
+readxl
+recipes
+reticulate
+rlang
+scales
+skimr
+stringr
+tidymodels
+tidyr
+tidyverse
+writexl
+xgboost
+zoo
+
+If you wish to install all of these packages at once, simply copy this code snippet into R and run it, and all packages will be installed:
+
+install.packages(c(
+  "broom","corrplot","dplyr","ggcorrplot","ggplot2","ggpmisc","here",
+  "kableExtra","knitr","MASS","Matrix","parsnip","plm","readxl","recipes",
+  "reticulate","rlang","scales","skimr","stringr","tidymodels","tidyr",
+  "tidyverse","writexl","xgboost","zoo"
+))
+
 #### Code Modules and Purpose
 
-_API Data Retrieval.R:_ Retrieves the Raw Data from The World Bank and from UNDP via API calls, does some light cleaning, and saves it in an RDS file (PreEDA_DataFrame) for further use.   **THis takes up to an hour to process so do not run unless you want updated data**
+_API Data Retrieval.R:_ 
 
-_Exploratory Data Analysis.R:_  
+1) Retrieves the Raw Data from The World Bank and from UNDP via API calls
+2) Joins data and performs light cleaning
+3) Saves cleaned/joined data to an RDS file (PreEDA_DataFrame) in Data folder for ingestion by Cleaning and EDA Module 
+**NOTE: This can take up to an hour to process so do not run unless you want more updated data than the base data set saved in /Data folder**
+
+_Cleaning and EDA.R:_ 
+
 1) Retrieves the raw data (PreEDA_DataFrame) created by the most recent API Data Retrieval run
 2) Retrieves the set of field-by-field cleaning actions "roadmap" we created to automate cleaning, saved in "FieldActions.xlsx"
-3) Retrieves the Income Group Data Excel file that was downloaded from the World Bank website
-4) Performs heavy duty cleaning based on a cleaning roadmap we created and saved in : and performs all EDA for the project
+3) Retrieves the Income Group Data Excel file that was downloaded from the World Bank website and joins it to the reset of the data
+4) Performs heavy duty cleaning based on a cleaning roadmap we created and saved in FieldActions.xlsx
+5) Saves the cleaned data in Excel file called FirstCutData.xlsx in the Data folder, for retrieval and use by Preprocessing code module
+6) Performs all Exploratory Analysis (EDA) for the project
 
-_Preprocessing.R:_  Retrieves the raw data that's in the RDS file created by the most recent API Data Retrieval run saved in the Data folder) and performs all EDA for the project
+_Preprocessing.R:_  
 
+1) Retrieves the cleaned data file FirstCutDasta.slsx (saved in the Data folder)
+2) performs all preprocessing, feature engineering, transformation, splitting, and dimension reduction
+3) Performs Principal Component Analysis (PCA) and adds top 5 PC's to data set
+4) Saves training and test data in train_data.rds and test_data.rds respectively to be ingested into any predictive model code modules
 
+_Two Variable Models.R:_  
+
+1) Ingests the training and testing data
+2) Builds and evaluates multiple two-variable predictive models (linear and logistic regression)
+
+_XGBoost Models.R:_  
+
+1) Ingests the training and testing data
+2) Builds and evaluates two XGboost model (quantitative predictor and classification)
+
+_Model Refinements.R:_  
+
+1) Ingests the training and testing data
+2) Examines the relationship between internet access and "Change in HDI"
+3) Measures level of autocorrelation in the data set
+4) Builds and evaluates panel regression model
