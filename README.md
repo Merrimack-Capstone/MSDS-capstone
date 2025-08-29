@@ -7,7 +7,7 @@ History has shown that disadvantaged populations experience improved wellbeing w
 
 ## Technical Details
 
-###_Code blocks commented with "REC" were written by Ray Chandonnet, code blocks commented with "BJV" were written by Barrett Viator
+### _Code blocks commented with "REC" were written by Ray Chandonnet, code blocks commented with "BJV" were written by Barrett Viator_
 
 ### Code Modules written in R
 
