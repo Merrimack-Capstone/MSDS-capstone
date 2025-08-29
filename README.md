@@ -18,32 +18,7 @@ Most of the R modules import / export data to/from the /Data folder using the he
 
 The R modules below use some or all of the following packages:
 
-broom
-corrplot
-dplyr
-ggcorrplot
-ggplot2
-ggpmisc
-here
-kableExtra
-knitr
-MASS
-Matrix
-parsnip
-plm
-readxl
-recipes
-reticulate
-rlang
-scales
-skimr
-stringr
-tidymodels
-tidyr
-tidyverse
-writexl
-xgboost
-zoo
+broom, corrplot, dplyr, ggcorrplot, ggplot2, ggpmisc, here, kableExtra, knitr, MASS, Matrix, parsnip, plm, readxl, recipes, reticulate, rlang, scales, skimr, stringr, tidymodels, tidyr, tidyverse, writexl, xgboost, zoo
 
 If you wish to install all of these packages at once, simply copy this code snippet into R and run it, and all packages will be installed:
 
