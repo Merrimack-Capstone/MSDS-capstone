@@ -248,6 +248,19 @@ predictions_class_final <- matrix(predictions_final, ncol = num_class, byrow = T
 final_accuracy <- sum(predictions_class_final == test_target) / length(test_target)
 cat("\nFinal XGBoost Accuracy on Test Data:", final_accuracy, "\n")
 
+# Calculate Log Loss on Predictions
+# Reshape predictions into N x num_class matrix
+predictions_matrix <- matrix(predictions_final, ncol = num_class, byrow = TRUE)
+
+# One-hot encode true labels
+true_matrix <- matrix(0, nrow = length(test_target), ncol = num_class)
+true_matrix[cbind(1:length(test_target), test_target + 1)] <- 1
+
+# Calculate log loss
+eps <- 1e-15  # small number to avoid log(0)
+logloss <- -mean(rowSums(true_matrix * log(pmax(predictions_matrix, eps))))
+cat("Final XGBoost Log Loss on Test Data:", logloss, "\n")
+
 # Visualize model performance
 
 confusion_matrix <- table(Actual = test_target, Predicted = predictions_class_final)
@@ -462,6 +475,18 @@ predictions2 <- predict(final_xgb_model2, newdata = dtest2)
 mean_absolute_error2 <- mean(abs(test_target2 - predictions2))
 cat("Mean Absolute Error:", mean_absolute_error2, "\n")
 
+root_mean_squared_error2 <- sqrt(mean((test_target2 - predictions2)^2))
+cat("Root Mean Squared Error:", root_mean_squared_error2, "\n")
+
+mean_absolute_percentage_error2 <- mean(abs((test_target2 - predictions2) / test_target2), na.rm = TRUE) * 100
+cat("Mean Absolute Percentage Error (%):", mean_absolute_percentage_error2, "\n")
+
+median_absolute_error2 <- median(abs(test_target2 - predictions2))
+cat("Median Absolute Error:", median_absolute_error2, "\n")
+
+r_squared2 <- 1 - sum((test_target2 - predictions2)^2) / sum((test_target2 - mean(test_target2))^2)
+cat("R-squared:", r_squared2, "\n")
+
 # Visualize Feature Importance 
 
 importance_matrix2 <- xgb.importance(feature_names = colnames(dtrain2), 
@@ -505,7 +530,3 @@ xg_resid2 <- ggplot(results2, aes(x = Residuals)) +
   theme_minimal()
 
 print(xg_resid2)
-
-##########################################################################
-#
-# We run this again

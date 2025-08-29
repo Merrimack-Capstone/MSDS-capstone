@@ -109,7 +109,7 @@ cols <- c("HDI_Index", "YearlyChgHDI","InternetUsersPct",
           "Cumulative3yrChg_HDI")
 
 #
-# The correlation heatmap shpws that there's really no correlation between the
+# The correlation heatmap shows that there's really no correlation between the
 # change in internet access and the change in HDI.   So trying to relate them 
 # directly using linear OLS is a dead-end.  So far, it's still correlation rather
 # than causation
