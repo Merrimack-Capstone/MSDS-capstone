@@ -7,6 +7,8 @@ History has shown that disadvantaged populations experience improved wellbeing w
 
 ## Technical Details
 
+###_Code blocks commented with "REC" were written by Ray Chandonnet, code blocks commented with "BJV" were written by Barrett Viator
+
 ### Code Modules written in R
 
 #### IMPORTANT:  Setting Up relative file references
@@ -14,7 +16,14 @@ Most of the R modules import / export data to/from the /Data folder using the he
 
 #### Code Modules and Purpose
 
-**PCA CODE:** This  
+_API Data Retrieval.R:_ Retrieves the Raw Data from The World Bank and from UNDP via API calls, does some light cleaning, and saves it in an RDS file (PreEDA_DataFrame) for further use.   **THis takes up to an hour to process so do not run unless you want updated data**
 
+_Exploratory Data Analysis.R:_  
+1) Retrieves the raw data (PreEDA_DataFrame) created by the most recent API Data Retrieval run
+2) Retrieves the set of field-by-field cleaning actions "roadmap" we created to automate cleaning, saved in "FieldActions.xlsx"
+3) Retrieves the Income Group Data Excel file that was downloaded from the World Bank website
+4) Performs heavy duty cleaning based on a cleaning roadmap we created and saved in : and performs all EDA for the project
+
+_Preprocessing.R:_  Retrieves the raw data that's in the RDS file created by the most recent API Data Retrieval run saved in the Data folder) and performs all EDA for the project
 
 
