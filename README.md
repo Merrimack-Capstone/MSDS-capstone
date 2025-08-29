@@ -38,7 +38,9 @@ _API Data Retrieval.R:_
 3) Saves cleaned/joined data to an RDS file (PreEDA_DataFrame) in Data folder for ingestion by Cleaning and EDA Module 
 **NOTE: This can take up to an hour to process so do not run unless you want more updated data than the base data set saved in /Data folder**
 
-_Cleaning and EDA.R:_ 
+_Cleaning and EDA.R and Cleaining and EDA.Rmd:_ 
+
+_A raw annotated script file is provided for interactive execution, but the Rmd file is preferred as the table outputs are designed to render using kable_
 
 1) Retrieves the raw data (PreEDA_DataFrame) created by the most recent API Data Retrieval run
 2) Retrieves the set of field-by-field cleaning actions "roadmap" we created to automate cleaning, saved in "FieldActions.xlsx"
