@@ -11,19 +11,22 @@ library(here)
 library(Matrix)
 library(xgboost)
 
-
+# This code module produces XGboost models to predict HDI Index and HDI Category
+#
+# REC code
 # Read in the saved training and test data sets
 train_data <- readRDS(here::here("Data", "train_data.rds"))
 test_data <- readRDS(here::here("Data", "test_data.rds"))
 PCAData_test <- readRDS(here::here("Data", "PCAData_test.rds"))
 PCAData_train <- readRDS(here::here("Data", "PCAData_train.rds"))
-importance_matrix <- readRDS(here::here("Data", "xgboost_importance_matrix.rds"))
 
 # Model 2c
 #
 # This first model is an XGBoost model.  It will predict the HDI category, not the 
 # index, and it uses static current InternetUsersPct as our "key" feature
-
+#
+# BJV code
+#
 model_columns <- c(
   "CountryCode", "HDI_Category", "FoodIndex", "ElectricAccess", "PopDensity", 
   "PopInSlums", "WaterStress", "InternetUsersPct", "GDPPerCapGrowth", "GDPGrowth",
@@ -185,6 +188,7 @@ params_final <- list(
   nthread = 1
 )
 
+# REC code
 output_df <- results_df %>%
   mutate(run_id = row_number()) %>%          # preserve original run order
   arrange(loglossmean) %>%                   # sort by loglossmean ascending
@@ -205,7 +209,7 @@ ggplot(results_df, aes(x = loglossmean)) +
     axis.title = element_text(size = 24),
     plot.title = element_text(size = 30, face = "bold")
   )
-
+# BJV code
 final_xgb_model <- xgboost(
   params = params_final,
   data = train_matrix,
@@ -253,17 +257,16 @@ xgb.plot.importance(importance_matrix, top_n = 10)
 cat("\nSummary of Feature Importance Matrix:\n")
 print(importance_matrix)
 
-saveRDS(importance_matrix, file = "xgboost_importance_matrix.rds")
-
 ##########################################################################
 
 # Model 5q
 
 # XGBoost InternetUserPct Regression
 
-
 # Create a List of columns to evaluate
-
+#
+# BJV code
+#
 model_columns2 <- c(
   "CountryCode", "HDI_Index", "FoodIndex", "ElectricAccess", "PopDensity", 
   "PopInSlums", "WaterStress", "InternetUsersPct", "GDPPerCapGrowth", "GDPGrowth",
@@ -407,7 +410,9 @@ best_model_settings2 <- results_df2[which.min(results_df2$rmse),]
 cat("\n--- Best Model Settings (Based on CV Logloss) ---\n")
 print(best_model_settings2)
 cat("--------------------------\n")
-
+#
+# REC code
+#
 output2_df <- results_df2 %>%
   mutate(run_id = row_number()) %>%          # preserve original run order
   arrange(rmse) %>%                   # sort by rmse ascending
@@ -428,7 +433,7 @@ ggplot(results_df2, aes(x = rmse)) +
     axis.title = element_text(size = 24),
     plot.title = element_text(size = 30, face = "bold")
   )
-
+# BJV code
 set.seed(123)
 # Final Model with best settings
 params_final2 <- list(
@@ -481,7 +486,7 @@ xgb.plot.importance(importance_matrix2, top_n = 10)
 importance_matrix2 <- xgb.importance(feature_names = colnames(dtrain2), 
                                      model = final_xgb_model2)
 
-
+# REC code
 # Create a data frame for plotting predictions vs. actuals
 results2 <- data.frame(Actual = test_target2, Predicted = predictions2)
 

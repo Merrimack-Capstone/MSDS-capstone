@@ -10,20 +10,24 @@ library(here)
 library(rlang)
 library(zoo)
 
+# This code module does ALL preprocessing of data to prepare for model building, and saves
+# the result to be ingested by model-building code modules
+
 PreProcessingData <- readRDS(here::here("Data","FirstCutData.rds")) # Get Data
 stoplight <- c("#1a9641", "#ffea00", "#d7191c") # define heatmap colors
-sleeptime <- 0.5
+sleeptime <- 0.5 # of seconds to pause for graphics rendering
 ##########################################################################
 
 # FUNCTIONS
 
+# Delay code execution to let graphics rendering finish
 wait_to_render <- function(seconds){
   Sys.sleep(seconds())
 }
 
-# Overall data missingness heatmap
+# Missingness heatmap for a single given country
 OneCountryMissingness <- function(data, code) {
-  
+  # remove response and main predictor fields we won't be imputing
   data <- data %>%
     dplyr::select(-Lag1_InternetUsersPct,
            -Lag2_InternetUsersPct,
@@ -32,24 +36,22 @@ OneCountryMissingness <- function(data, code) {
            -Cumulative3yrChg_InternetUsersPct,
            -YearlyChgHDI,
            -YearlyChgInternet)
-  
+  # Calculate missingness of all numeric variables, by year, for the given country
   missing_heatmap_data <- data %>%
     filter(CountryCode == code) %>%
     dplyr::select(-CountryCode, -CountryName, -IncomeGroup, -HDI_Category) %>%
     pivot_longer(cols = -year, names_to = "variable", values_to = "value") %>%
     mutate(Status = ifelse(is.na(value), "Missing", "Present"))
-  
   # Order variables by overall missingness (most missing at top)
   var_order <- missing_heatmap_data %>%
     group_by(variable) %>%
     summarize(frac_missing = mean(Status == "Missing"), .groups = "drop") %>%
     arrange(dplyr::desc(frac_missing)) %>%
     pull(variable)
+    missing_heatmap_data <- missing_heatmap_data %>%
+      mutate(variable = factor(variable, levels = var_order))
   
-  missing_heatmap_data <- missing_heatmap_data %>%
-    mutate(variable = factor(variable, levels = var_order))
-  
-  # 2) Plot: white = Present, red = Missing
+  # Plot: white = Present, red = Missing
   print(
     ggplot(missing_heatmap_data, aes(x = year, y = variable, fill = Status)) +
       geom_tile(color = "white") +
@@ -65,8 +67,9 @@ OneCountryMissingness <- function(data, code) {
         axis.text.x = element_text(angle = 45, hjust = 1)
       )
   )
-  wait_to_render(sleeptime)
+  wait_to_render(sleeptime) # pause for graphics rendering
 }
+
 
 OverallMissingnessHeatmap <- function(data) {
   data <- data %>%
@@ -106,7 +109,6 @@ OverallMissingnessHeatmap <- function(data) {
 }
 
 # Missingness chart by variable
-
 MissingnessByVariable <- function(data) {
    PlotData <- data %>%
     dplyr::select(-Lag1_InternetUsersPct,
@@ -227,6 +229,7 @@ FourPlots <- function(data, cutoff) {
   MissingnessByCountry(data, cutoff)
   OverallMissingnessHeatmap(data)
 }
+
 # This function plots average UCHCServiceCoverage by year 
 
 PlotUHC <- function(data, sleeptime = 0) {
@@ -287,6 +290,9 @@ PlotSlums <- function(data){
 # recipe, preps it and returns the prepped recipe.   That prepped recipe will 
 # be used to "bake" both the training and 
 
+# BJV Code except REC converted to a function, split into test/train and applied training
+# lambdas to test data to avoid leakage
+
 Yeo_Johnson <- function(train_data, test_data) {
   
   # Get affected columns from training data
@@ -296,7 +302,7 @@ Yeo_Johnson <- function(train_data, test_data) {
            Lag2_InternetUsersPct) %>%
     names()
   
-  # Preprocessing recipe - fit only on training data
+# Preprocessing recipe - fit only on training data
   data_recipe <- recipe(~ ., data = train_data) %>%
     update_role(CountryName, CountryCode, new_role = "id") %>%
     step_YeoJohnson(all_of(affected_cols), na_rm = TRUE)
@@ -342,6 +348,7 @@ Yeo_Johnson <- function(train_data, test_data) {
     test = test_transformed
   ))
 }
+# REC code
 #
 # This function imputes missing data using time trend fitting, as follows:
 # The variable name is passed as an argument so the function can work with 
@@ -365,22 +372,24 @@ impute_time_trend <- function(data, var_name, floor, cap) {
       y <- df_country[[as_name(var_sym)]]
       known <- df_country %>% filter(!is.na(y))
       
-      if (nrow(known) >= 3) {
+      if (nrow(known) >= 3) { # quadratic regression
         model <- lm(y ~ poly(year, 2, raw = TRUE), data = df_country)
-        preds <- predict(model, newdata = df_country)
-      } else if (nrow(known) == 2) {
+        imputed_values <- predict(model, newdata = df_country)
+      } else if (nrow(known) == 2) { # linear regression
         model <- lm(y ~ year, data = df_country)
-        preds <- predict(model, newdata = df_country)
-      } else if (nrow(known) == 1) {
-        preds <- rep(known[[rlang::as_name(var_sym)]][1], nrow(df_country))
-      } else {
-        preds <- rep(NA_real_, nrow(df_country))
+        imputed_values <- predict(model, newdata = df_country)
+      } else if (nrow(known) == 1) { # copy the one know value
+        imputed_values <- rep(known[[rlang::as_name(var_sym)]][1], nrow(df_country))
+      } else { # leave NA
+        imputed_values <- rep(NA_real_, nrow(df_country))
       }
-      
-      missing_idx <- is.na(y) & !is.na(preds)
-      preds_clipped <- pmin(cap, pmax(floor, preds[missing_idx]))
-      df_country[[rlang::as_name(var_sym)]][missing_idx] <- preds_clipped
-      df_country
+      missing_idx <- is.na(y) & !is.na(imputed_values)  # identify the missing data points for which
+                                                        # we have a valid imputed value
+      imputed_values <- pmin(cap, 
+                             pmax(floor,
+                                  imputed_values[missing_idx])) # apply cap and floor to imputed values
+      df_country[[as_name(var_sym)]][missing_idx] <- imputed_values # fill in missing values
+      df_country # return the filled in dataframe
     }) %>%
     ungroup()
 }
@@ -444,16 +453,16 @@ PreProcessingData <- PreProcessingData |>
   ) |>
   ungroup()
 
-# Set up HDI Bins
+# Create binned HDI Category using UN rules as an ordered factor
 PreProcessingData <- PreProcessingData %>%
   mutate(
     HDI_Category = case_when(
       HDI_Index >= 0.800 ~ "Very high",
-      HDI_Index >= 0.700 & HDI_Index <= 0.799 ~ "High",
-      HDI_Index >= 0.550 & HDI_Index <= 0.699 ~ "Medium",
+      HDI_Index >= 0.700 & HDI_Index < 0.8 ~ "High",
+      HDI_Index >= 0.550 & HDI_Index < 0.7 ~ "Medium",
       TRUE ~ "Low"
     ),
-    HDI_Category = factor(
+    HDI_Category = factor( #turn into ordered factor
       HDI_Category,
       levels = c(
         "Low",
@@ -464,8 +473,9 @@ PreProcessingData <- PreProcessingData %>%
       ordered = TRUE
     )
   )
-
-
+# 
+# BJV code
+#
 # move the position of the new classified HDI data to a more relevant spot
 PreProcessingData <- PreProcessingData%>%
   relocate(HDI_Category, .after = HDI_Index)
@@ -491,7 +501,9 @@ PreProcessingData <- PreProcessingData %>%
 
 print("\nData with the new columns:")
 print(PreProcessingData)
-
+#
+# REC code
+#
 ##############################################################
 #
 # DEALING WITH MISSING DATA - OVERALL
@@ -521,7 +533,7 @@ PreProcessingData <- PreProcessingData %>%
 # Review missingness by variable
 MissingnessByVariable(PreProcessingData)
 
-# Delete the features that have over 25% missing data with no
+# Delete the features that have over 40% missing data with no
 # pattern to the missingness
 
 PreProcessingData <- PreProcessingData %>%
@@ -773,7 +785,6 @@ OneCountryMissingness(PreProcessingData,code)
 code <- "MCO"
 OneCountryMissingness(PreProcessingData,code)
 
-
 # Too much important data missing from all three so drop them entirely
 # (Most would be dropped before modeling anyway)
 PreProcessingData <- PreProcessingData %>%
@@ -877,9 +888,11 @@ ineligible_13
 subset(PreProcessingData,
        CountryCode %in% ineligible_13 & year < 2022 ,
        select = c("CountryCode","year","WaterStress"))
+#
 # Turns out there is NO data for any of those 13 countries
 # Copy the imputed data over
 # Copy 2022 imputed into WaterStress (only where WaterStress is NA), then drop helper column
+#
 idx <- PreProcessingData$year == 2022 & is.na(PreProcessingData$WaterStress) & 
   !is.na(PreProcessingData$WaterStress_imputed)
 PreProcessingData$WaterStress[idx] <- PreProcessingData$WaterStress_imputed[idx]
@@ -945,7 +958,7 @@ FourPlots(PreProcessingData,10)
 # the test data
 #
 # 3) Maintain the same stratification by IncomeGroup in both training and test data,
-# since we showed in EDA that IncomeGroup is a very meaninginful clustering 
+# since we showed in EDA that IncomeGroup is a very meaningful clustering 
 # differentiator for internet access and HDI - this prevents model bias
 #
 train_countries <- PreProcessingData %>%
@@ -993,7 +1006,7 @@ print(combined_dist)
 # Now we do all the transformations and imputations that have to be done on training 
 # and test data separately to avoid leakage
 
-# Fix the skewness
+# Fix the skewness using Yeo-Johnson
 YJ_result <- Yeo_Johnson(train_data, test_data)
 train_data <- YJ_result$train
 test_data  <- YJ_result$test
@@ -1003,6 +1016,7 @@ test_data  <- YJ_result$test
 # PCA - needs to be done on training data, with the same loadings applied
 # to both training and test data
 # PCA Recipe
+# REC Code
 numeric_cols_for_pca <- train_data %>%
   dplyr::select(where(is.numeric), -year, 
          -HDI_Index,
@@ -1015,7 +1029,7 @@ numeric_cols_for_pca <- train_data %>%
          -YearlyChgInternet,
          -YearlyChgHDI) %>%
   names()
-
+# BJV code
 pca_recipe <- train_data %>%
   recipe() %>%
   step_impute_mean(all_of(numeric_cols_for_pca)) %>%
@@ -1085,8 +1099,6 @@ pca_biplot <- ggplot(PCAData_train, aes(x = PC1, y = PC2)) +
     size = 2,
     hjust = 0.5, vjust = 3
   ) +
-  
-  
   labs(
     title = "PCA Biplot of PC1 and PC2",
     x = "Principal Component 1",
@@ -1116,7 +1128,9 @@ pca_bar_plot <- pca_loadings_long %>%
   ) +
   theme_minimal()
 print(pca_bar_plot)
-
+#
+# REC Code
+#
 # SAVE THE PREPPED DATA FILES FOR MODELS TO INGEST
 #
 saveRDS(train_data, file = here::here("Data", "train_data.rds"))

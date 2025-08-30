@@ -62,7 +62,7 @@ FirstCutData <- CleanedData %>%
   select(all_of(PrimaryFields))
 
 # Done with cleaning so save the data for Preprocessing
-write_xlsx(FirstCutData, path = here::here("Data","FirstCutData.xlsx"))
+saveRDS(FirstCutData, file = here::here("Data", "FirstCutData.rds"))
 
 ##############################################
 #
