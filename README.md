@@ -62,7 +62,7 @@ _A raw annotated script file is provided for interactive execution, but the Rmd 
 2) Retrieves the set of field-by-field cleaning actions "roadmap" we created to automate cleaning, saved in "FieldActions.xlsx"
 3) Retrieves the Income Group Data Excel file that was downloaded from the World Bank website and joins it to the reset of the data
 4) Performs heavy duty cleaning based on a cleaning roadmap we created and saved in FieldActions.xlsx
-5) Saves the cleaned data in Excel file called FirstCutData.xlsx in the Data folder, for retrieval and use by Preprocessing code module
+5) Saves the cleaned data in FirstCutData.rds in the Data folder, for retrieval and use by Preprocessing code module
 6) Performs all Exploratory Analysis (EDA) for the project
 
 #### _Preprocessing.R:_  
