@@ -3,32 +3,14 @@
 library(tidyverse)
 library(ggplot2)
 library(dplyr)
-library(readxl)
-library(writexl)
-library(skimr)
+library(tidyr)
 library(knitr)
 library(kableExtra)
-library(tidyr)
-library(ggpmisc)
-library(forcats)
-library(corrplot)
-library(naniar)
-library(reshape2)
 library(scales)
-library(stringr)
-library(recipes)
-library(broom)
 library(here)
-library(rlang)
-library(rsample)
-library(xts)
-library(randomForest)
-library(caTools)
-library(caret)
-library(RANN)
-library(xgboost)
 library(Matrix)
-library(e1071)
+library(xgboost)
+
 
 # Read in the saved training and test data sets
 train_data <- readRDS(here::here("Data", "train_data.rds"))
@@ -37,6 +19,8 @@ PCAData_test <- readRDS(here::here("Data", "PCAData_test.rds"))
 PCAData_train <- readRDS(here::here("Data", "PCAData_train.rds"))
 importance_matrix <- readRDS(here::here("Data", "xgboost_importance_matrix.rds"))
 
+# Model 2c
+#
 # This first model is an XGBoost model.  It will predict the HDI category, not the 
 # index, and it uses static current InternetUsersPct as our "key" feature
 
@@ -82,7 +66,6 @@ combined_predictors <- bind_rows(train_predictors, test_predictors)
 # Convert all factor/character columns to a sparse matrix for XGBoost
 
 combined_matrix <- sparse.model.matrix(~ . -1, data = combined_predictors)
-
 
 # Split the combined matrix back into training and test matrices
 
@@ -143,7 +126,6 @@ for (i in 1:nrow(hyper_grid)) {
   )
 
 # We use xgb.cv for hyperparameter tuning.     
-
   cv_model <- xgb.cv(
     params = params,
     data = dtrain,
@@ -155,14 +137,12 @@ for (i in 1:nrow(hyper_grid)) {
   )
   
 # Get the best cross-validation accuracy
-  
   best_iteration <- cv_model$best_iteration
   cv_loglossmean <- cv_model$evaluation_log[best_iteration,]$test_mlogloss_mean
   cv_acc <- 1 - cv_model$evaluation_log[best_iteration, ]$test_merror_mean
   roundsrun <- nrow(cv_model$evaluation_log)
   
 # Store the results
-  
   results_list[[i]] <- list(
     eta = current_eta,
     max_depth = current_max_depth,
@@ -276,6 +256,8 @@ print(importance_matrix)
 saveRDS(importance_matrix, file = "xgboost_importance_matrix.rds")
 
 ##########################################################################
+
+# Model 5q
 
 # XGBoost InternetUserPct Regression
 

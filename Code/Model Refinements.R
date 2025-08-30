@@ -3,37 +3,14 @@
 library(tidyverse)
 library(ggplot2)
 library(dplyr)
-library(readxl)
-library(writexl)
-library(skimr)
-library(knitr)
-library(kableExtra)
 library(tidyr)
-library(ggpmisc)
-library(forcats)
-library(corrplot)
-library(naniar)
-library(reshape2)
-library(scales)
-library(stringr)
 library(recipes)
-library(broom)
 library(here)
-library(rlang)
-library(rsample)
-library(xts)
-library(randomForest)
-library(caTools)
-library(caret)
-library(RANN)
-library(xgboost)
-library(Matrix)
-library(e1071)
 library(parsnip)
 library(tidymodels)
-library(MASS)
 library(ggcorrplot)
 library(plm)
+
 
 PreProcessingData <- readRDS(here::here("Data","FirstCutData.rds")) # Get Data
 print_regressions <- function(predictions, change = FALSE){
@@ -164,7 +141,9 @@ metrics(test_pred_chg, truth = HDI_Index, estimate = .pred)
 # is essentially zero.  So again, no help in isolate the impact or causality of internet
 # access on HDI
 #
-# Here we run a panel regression, controlling for country and year, to deal with the
+# Model 4q
+#
+# Given the autocorrelation, here we run a panel regression, controlling for country and year, to deal with the
 # autocorrelation within countries and across years, and attempt to isolate the impact 
 # of changes in internet access
 

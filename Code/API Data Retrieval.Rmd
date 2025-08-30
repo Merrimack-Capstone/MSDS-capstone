@@ -1,8 +1,20 @@
 ---
 title: "Capstone R Work"
-author: "Barrett Viator"
+author: "Barrett Viator and Ray Chandonnet"
 date: "2025-07-26"
-output: pdf_document
+output:
+    pdf_document:
+    latex_engine: xelatex
+    number_sections: true
+    keep_tex: true
+    extra_dependencies: ["lscape"]
+    pandoc_args: ["--variable", "geometry:landscape", "--variable", "geometry:margin=0.75in"]
+header-includes:
+  - \usepackage{xcolor}
+---
+
+
+\textcolor{blue}{This code retrieves data from both the World Bank and UNDB databases via API calls.  The APi calls are in python and therefore are run using the reticulate package which allows seamless exchange between R and Python.   Once the data is cleaned and joined into a single dataframe, that dataframe is written to a .rds file for use in the EDA script}
 ---
 
 ```{r setup, include=FALSE}
@@ -15,27 +27,43 @@ library(reticulate)
 library(tidyverse)
 library(ggplot2)
 library(dplyr)
+library(here)
 
 ```
 
 
 ```{r}
-# The name for our virtual environment - BJV
+# Portable setup for Python environment via reticulate
+if (!requireNamespace("reticulate", quietly = TRUE)) {
+  install.packages("reticulate")
+}
+library(reticulate)
+
 env_name <- "retic_env2"
 
-# create our virtual env - BJV
-message("Creating virtual environment '", env_name, "' and installing packages...")
+# Only create the environment if it doesn't exist
+if (!env_name %in% virtualenv_list()) {
+  message("Creating virtual environment '", env_name, "' and installing packages...")
+  virtualenv_create(
+    envname = env_name
+  )
+  
+  # Install required packages after creation
+  py_install(
+    packages = c("pandas", "requests", "openpyxl", "pycountry", "wbgapi"),
+    envname = env_name,
+    pip = TRUE
+  )
+} else {
+  message("Virtual environment '", env_name, "' already exists.")
+}
 
-reticulate::virtualenv_create(
-  envname = env_name,
-  packages = c("pandas", "requests", "openpyxl", "pycountry", "wbgapi")
-)
+# Activate the environment
+use_virtualenv(env_name, required = TRUE)
 
-# Direct R to the correct virtual environment
-reticulate::use_virtualenv(env_name, required = TRUE)
-
-message("\nPython environment is now set up and ready.")
+# Confirm setup
 py_config()
+
 
 ```
 
@@ -88,7 +116,9 @@ wb_series_codes = [
     'RL.EST',
     'VA.EST',
     'SM.POP.TOTL.ZS',
-    'SI.POV.GINI'
+    'SI.POV.GINI',
+    'NY.GDP.MKTP.KD.ZG',
+    'NY.GDP.MKTP.KD'
 ]
 
 # Create a data frame from the World Bank API - BJV
@@ -378,9 +408,8 @@ wb_undp_df_r <- py$mapped_full_df
 ```{r}
 
 # Example of the python code turning into a dataframe that works with tidyverse, etc. - BJV
+# Also - save the dataframe into an .rds file to be imported into our EDA and then feature engineering code
 glimpse(wb_undp_df_r)
-
-
 head(wb_undp_df_r)
-
+saveRDS(wb_undp_df_r, file = here::here("Data","PreEDA_DataFrame.rds"))
 ```

@@ -1,34 +1,10 @@
 # Import Libraries 
 
 library(tidyverse)
-library(ggplot2)
-library(dplyr)
-library(readxl)
-library(writexl)
-library(skimr)
-library(knitr)
-library(kableExtra)
-library(tidyr)
-library(ggpmisc)
-library(forcats)
-library(corrplot)
-library(naniar)
-library(reshape2)
-library(scales)
-library(stringr)
 library(recipes)
 library(broom)
 library(here)
 library(rlang)
-library(rsample)
-library(xts)
-library(randomForest)
-library(caTools)
-library(caret)
-library(RANN)
-library(xgboost)
-library(Matrix)
-library(e1071)
 library(parsnip)
 library(tidymodels)
 library(MASS)
@@ -325,14 +301,12 @@ ggplot(train_filtered, aes(x = Cumulative3yrChg_InternetUsersPct, y = HDI_Index)
   ) +
   theme_minimal()
 
-
-
-
-
 ############################################################################
 #
 # Predicting HDI CATEGORY
-
+#
+# Model 8q
+#
 # Use the category outcome instead of the index
 model_columns <- c("HDI_Category", "InternetUsersPct")
 
@@ -362,7 +336,7 @@ predictions <- augment(fitted_model, new_data = test_filtered)
 Pred_Acc <- accuracy(predictions, truth = HDI_Category, estimate = .pred_class)
 print(paste0("Prediction Accuracy: ", Pred_Acc))
 Pred_MLL <- mn_log_loss(predictions, truth = HDI_Category, 
-                        +             c(.pred_Low, .pred_Medium, 
+                        c(.pred_Low, .pred_Medium, 
                                         .pred_High, `.pred_Very high`))
 print(paste0("Prediction Mean Log Loss : ", Pred_MLL ))
 # Visualize model performance
@@ -374,6 +348,3 @@ print(confusion_matrix)
 # Show distribution of data by category, shortening the category names
 short_cat <- gsub(" human development", "", train_data$HDI_Category)
 prop.table(table(short_cat)) * 100
-
-
-#################################################
