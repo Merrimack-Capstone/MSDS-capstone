@@ -5,6 +5,19 @@ Users” And Their Home Countries?
 ## Abstract
 History has shown that disadvantaged populations experience improved wellbeing when infrastructure improvements impact their lives.   A diverse set of stakeholders, including governments, aid organizations and private sector technology companies,  would benefit from being able to quantify (at minimum) and predict (ideally) the extent to which expanded access to the internet is one such infrastructure improvement that leads directly to higher population wellbeing.   This report describes in depth the application of statistical and machine-learning based predictive analytics to both correlate and isolate causal links between access to the internet and population wellbeing.   Using 30 years worth of data, consisting of a subset of raw, transformed and abstracted data vectors from the World Bank (for inputs that could influence wellbeing),  and the United Nations (for the Human Development Index chosen as the basis for measuring wellbeing), this study demonstrates that the correlation between internet access and population wellbeing is positive and statistically relevant.  This study also demonstrates that, while it is challenging to firmly quantify a causal relationship between internet access and wellbeing, well-performing broader models that predict wellbeing rely on internet access as an important positive factor in predicted wellbeing.  Finally,this study shows that investing in broadening access to (ideally, renewable) electricity in developing countries is arguably the MOST important factor influencing wellbeing, as well as a necessary precursor to broadening internet access as a wellbeing growth accelerant.   These findings can serve as support for prescriptive strategy for both private and public sector entities.  Furthermore, because the data acquisition modules and predictive models that are the backbone of this study are built on public data and can be updated dynamically as new data becomes available, entities relying on these models to support their strategy can update the results regularly and make interpretative course-corrections as indicated.
 
+## Reports
+
+Written reports on the various stages of this project can be found in the Reports folder of this repository.  They include:
+
+1) Preliminary Project Proposal.docx
+2) Final Project Proposal
+3) Cleaning and EDA Report.pdf
+4) Preprocessing and Initial Model Report.pdf
+5) Final Report.pdf
+
+Their contents are self-explanatory given the file names.   They are listed in the order they were produced, which shows the evolution of the project over time.    
+The reader may prefer to start with the Final Report and then consult the other reports for more detail as desired. 
+
 ## Technical Details
 
 ##### _Code blocks commented with "REC" were written by Ray Chandonnet, code blocks commented with "BJV" were written by Barrett Viator_
@@ -57,7 +70,6 @@ _A raw annotated script file is provided for interactive execution, but the Rmd 
 4) Saves training and test data in train_data.rds and test_data.rds respectively to be ingested into any predictive model code modules
 
 Custom functions:  
-  
   a) _wait_to_render_: instructs system to pause a given parameter's number of seconds to allow for graphics rendering before continuing  
   b) _OneCountryMissingness_:  Produces a data missingness heatmap for a given country, with the data and country passed as parameters  
   c) _OverallMissingnessHeatmap_:  Produces a data missingness heatmap for all the data, by variable and year  
@@ -74,6 +86,9 @@ Custom functions:
 
 1) Ingests the training and testing data
 2) Builds and evaluates multiple two-variable predictive models (linear and logistic regression)
+
+Custom functions:  
+    a) _print_regressions_: displays two plots that evaluate the predictions on a test set using a given model, with different chart title bawsed on the parameters passed
 
 #### _XGBoost Models.R:_  
 
