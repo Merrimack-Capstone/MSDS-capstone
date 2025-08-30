@@ -3,7 +3,7 @@ Bridging the Digital Divide for the Next Billion Users: Can we predicting change
 Users” And Their Home Countries?
 
 ## Authors
-Raymond E. Chandonnet - _chandonnetr@merrimack.edu_
+Raymond E. Chandonnet - _chandonnetr@merrimack.edu_  
 Barret J. Viator - _viatorb@merrimack.edu_
 
 ## Abstract
