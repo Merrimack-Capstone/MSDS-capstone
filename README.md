@@ -57,17 +57,17 @@ _A raw annotated script file is provided for interactive execution, but the Rmd 
 4) Saves training and test data in train_data.rds and test_data.rds respectively to be ingested into any predictive model code modules
 
 Custom functions:
-  a) wait_to_render: instructs system to pause a given parameter's number of seconds to allow for graphics rendering before continuing
-  b) OneCountryMissingness:  Produces a data missingness heatmap for a given country, with the data and country passed as parameters
-  c) OverallMissingnessHeatmap:  Produces a data missingness heatmap for all the data, by variable and year
-  d) MissingnessByVariable:  Produces an overall data missingness chart by Variable
-  e) MissingnessByYear: Produces an overall data missingness chart by Year
-  f) MissingnessByCountry: Produces an overall data missingness chart by Country, for countries with missingness over a threshold parameter
-  g) FourPlots:  Generates the four primary missingness data plots / heatmaps
-  h) PlotUHC:  Plots the variable UCHServiceCoverage (averaged) by year - a variable that requires iterative imputation
-  i) PlotSlums: Plots the variable UCHServiceCoverage (averaged) by year - a variable that requires iterative imputation
-  j) Yeo_Johnson:  Perform's Yeo-Johnson transformation of the specified training and test data
-  k) impute_time_trend :  Imputes missing data for a given variable, by country, using time trend fitting; Parameters include the data set, the variable name to be imputed abnd a floor and cap to be observed on the imputed values
+  a) wait_to_render: instructs system to pause a given parameter's number of seconds to allow for graphics rendering before continuing  
+  b) OneCountryMissingness:  Produces a data missingness heatmap for a given country, with the data and country passed as parameters  
+  c) OverallMissingnessHeatmap:  Produces a data missingness heatmap for all the data, by variable and year  
+  d) MissingnessByVariable:  Produces an overall data missingness chart by Variable  
+  e) MissingnessByYear: Produces an overall data missingness chart by Year  
+  f) MissingnessByCountry: Produces an overall data missingness chart by Country, for countries with missingness over a threshold parameter  
+  g) FourPlots:  Generates the four primary missingness data plots / heatmaps  
+  h) PlotUHC:  Plots the variable UCHServiceCoverage (averaged) by year - a variable that requires iterative imputation  
+  i) PlotSlums: Plots the variable UCHServiceCoverage (averaged) by year - a variable that requires iterative imputation  
+  j) Yeo_Johnson:  Perform's Yeo-Johnson transformation of the specified training and test data  
+  k) impute_time_trend :  Imputes missing data for a given variable, by country, using time trend fitting; Parameters include the data set, the variable name to be imputed abnd a floor and cap to be observed on the imputed values  
 
 #### _Two Variable Models.R:_  
 
