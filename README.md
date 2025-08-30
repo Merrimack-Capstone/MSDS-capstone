@@ -42,6 +42,9 @@ install.packages(c(
   "tidyverse","writexl","xgboost","zoo"
 ))
 
+The python library dependencies are as follows:
+pandas, numpy, pyhere, tensorflow, scipy, scikit-learn, wbgapi, requests, pycountry, openpyxl, and matplotlib.
+
 #### Code Modules and Purpose
 
 #### _API Data Retrieval.R:_ 
