@@ -42,9 +42,6 @@ install.packages(c(
   "tidyverse","writexl","xgboost","zoo"
 ))
 
-The python library dependencies are as follows:
-pandas, numpy, pyhere, tensorflow, scipy, scikit-learn, wbgapi, requests, pycountry, openpyxl, and matplotlib.
-
 #### Code Modules and Purpose
 
 #### _API Data Retrieval.R:_ 
@@ -104,3 +101,28 @@ Custom functions:
 2) Examines the relationship between internet access and "Change in HDI"
 3) Measures level of autocorrelation in the data set
 4) Builds and evaluates panel regression model
+
+### Code Modules written in Python
+
+#### IMPORTANT:  Setting Up relative file references
+For Python code, relative file paths are handled using the pyhere package. As long as this repo is cloned properly, the code will automatically locate the /Data folder based on the project root. 
+
+#### Dependendencies
+
+The Python modules below use some or all of the following packages:
+
+pandas, numpy, pyhere, tensorflow, scipy, scikit-learn, wbgapi, requests, pycountry, openpyxl, and matplotlib.
+
+#### Code Modules and Purpose
+
+#### _API Data Retrieval.ipynb:_  
+This code retrieves World Bank and UNDP data via API calls.   This code can be run on its own to retrieve a dataset;  
+However, it was used to write and test code that was then run in R using Reticulate.  We include this file as background only.
+
+#### _FFNN Final Report_  
+This code builds and evaluates feed forward neural network prediction models.   These models did not make the final cut but were referenced in the final report. 
+
+#### _FFNN Hyperparameter Grid Version.ipynb
+This code builds and evaluates feed forward neural network prediction models iteratively using hyperparameter grid and tuning loops. While the results are promising, the validation error plot shows great volatility, the approach is computationally intense and interpretability is poor ("black box") relative to the XGboost models.  We include here as a basis for additional exploration
+
+
