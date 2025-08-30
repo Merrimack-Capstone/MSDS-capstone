@@ -126,7 +126,7 @@ However, it was used to write and test code that was then run in R using Reticul
 #### _FFNN Final Report_  
 This code builds and evaluates feed forward neural network prediction models.   These models did not make the final cut but were referenced in the final report. 
 
-#### _FFNN Hyperparameter Grid Version.ipynb
+#### _FFNN Hyperparameter Grid Version.ipynb_
 This code builds and evaluates feed forward neural network prediction models iteratively using hyperparameter grid and tuning loops. While the results are promising, the validation error plot shows great volatility, the approach is computationally intense and interpretability is poor ("black box") relative to the XGboost models.  We include here as a basis for additional exploration
 
 
