@@ -31,14 +31,14 @@ install.packages(c(
 
 #### Code Modules and Purpose
 
-_API Data Retrieval.R:_ 
+#### _API Data Retrieval.R:_ 
 
 1) Retrieves the Raw Data from The World Bank and from UNDP via API calls
 2) Joins data and performs light cleaning
 3) Saves cleaned/joined data to an RDS file (PreEDA_DataFrame) in Data folder for ingestion by Cleaning and EDA Module 
 **NOTE: This can take up to an hour to process so do not run unless you want more updated data than the base data set saved in /Data folder**
 
-_Cleaning and EDA.R and Cleaining and EDA.Rmd:_ 
+#### _Cleaning and EDA.R and Cleaning and EDA.Rmd:_ 
 
 _A raw annotated script file is provided for interactive execution, but the Rmd file is preferred as the table outputs are designed to render using kable_
 
@@ -49,24 +49,37 @@ _A raw annotated script file is provided for interactive execution, but the Rmd 
 5) Saves the cleaned data in Excel file called FirstCutData.xlsx in the Data folder, for retrieval and use by Preprocessing code module
 6) Performs all Exploratory Analysis (EDA) for the project
 
-_Preprocessing.R:_  
+#### _Preprocessing.R:_  
 
 1) Retrieves the cleaned data file FirstCutDasta.slsx (saved in the Data folder)
 2) performs all preprocessing, feature engineering, transformation, splitting, and dimension reduction
 3) Performs Principal Component Analysis (PCA) and adds top 5 PC's to data set
 4) Saves training and test data in train_data.rds and test_data.rds respectively to be ingested into any predictive model code modules
 
-_Two Variable Models.R:_  
+Custom functions:
+  a) wait_to_render: instructs system to pause a given parameter's number of seconds to allow for graphics rendering before continuing
+  b) OneCountryMissingness:  Produces a data missingness heatmap for a given country, with the data and country passed as parameters
+  c) OverallMissingnessHeatmap:  Produces a data missingness heatmap for all the data, by variable and year
+  d) MissingnessByVariable:  Produces an overall data missingness chart by Variable
+  e) MissingnessByYear: Produces an overall data missingness chart by Year
+  f) MissingnessByCountry: Produces an overall data missingness chart by Country, for countries with missingness over a threshold parameter
+  g) FourPlots:  Generates the four primary missingness data plots / heatmaps
+  h) PlotUHC:  Plots the variable UCHServiceCoverage (averaged) by year - a variable that requires iterative imputation
+  i) PlotSlums: Plots the variable UCHServiceCoverage (averaged) by year - a variable that requires iterative imputation
+  j) Yeo_Johnson:  Perform's Yeo-Johnson transformation of the specified training and test data
+  k) impute_time_trend :  Imputes missing data for a given variable, by country, using time trend fitting; Parameters include the data set, the variable name to be imputed abnd a floor and cap to be observed on the imputed values
+
+#### _Two Variable Models.R:_  
 
 1) Ingests the training and testing data
 2) Builds and evaluates multiple two-variable predictive models (linear and logistic regression)
 
-_XGBoost Models.R:_  
+#### _XGBoost Models.R:_  
 
 1) Ingests the training and testing data
 2) Builds and evaluates two XGboost model (quantitative predictor and classification)
 
-_Model Refinements.R:_  
+#### _Model Refinements.R:_  
 
 1) Ingests the training and testing data
 2) Examines the relationship between internet access and "Change in HDI"
